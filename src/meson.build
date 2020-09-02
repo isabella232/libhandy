@@ -14,6 +14,7 @@ hdy_public_enum_headers = [
   'hdy-leaflet.h',
   'hdy-navigation-direction.h',
   'hdy-squeezer.h',
+  'hdy-tab-bar.h',
   'hdy-view-switcher.h',
 ]
 
@@ -93,6 +94,9 @@ src_headers = [
   'hdy-swipe-group.h',
   'hdy-swipe-tracker.h',
   'hdy-swipeable.h',
+  'hdy-tab-bar.h',
+  'hdy-tab-view.h',
+  'hdy-title-bar.h',
   'hdy-title-bar.h',
   'hdy-types.h',
   'hdy-value-object.h',
@@ -149,6 +153,10 @@ src_sources = [
   'hdy-swipe-group.c',
   'hdy-swipe-tracker.c',
   'hdy-swipeable.c',
+  'hdy-tab.c',
+  'hdy-tab-bar.c',
+  'hdy-tab-box.c',
+  'hdy-tab-view.c',
   'hdy-title-bar.c',
   'hdy-value-object.c',
   'hdy-view-switcher.c',

@@ -334,3 +334,234 @@ window.csd.unified:not(.solid-csd):not(.fullscreen) {
     }
   }
 }
+
+
+
+$tab_selected_bg:           darken(darken($bg_color, 10%), 2%);
+$tab_selected_bg_backdrop:  $bg_color;
+
+@if $variant == 'dark' {
+  $tab_selected_bg:         lighten(darken($bg_color, 10%), 4%);
+}
+
+$tab_bg:                    darken($tab_selected_bg, 6%);
+$tab_bg_backdrop:           darken($tab_selected_bg_backdrop, 6%);
+
+$tab_bar_bg:                darken($tab_selected_bg, 9%);
+$tab_bar_bg_backdrop:       darken($tab_selected_bg_backdrop, 9%);
+
+$tab_hover_bg:              lighten($tab_bg, 5%);
+$tab_selected_hover_bg:     lighten($tab_selected_bg, 5%);
+
+@if $variant == 'dark' {
+  $tab_bg:                  darken($tab_selected_bg, 3%);
+  $tab_bg_backdrop:         darken($tab_selected_bg_backdrop, 3%);
+
+  $tab_bar_bg:              darken($tab_selected_bg, 6%);
+  $tab_bar_bg_backdrop:     darken($tab_selected_bg_backdrop, 6%);
+
+  $tab_hover_bg:            lighten($tab_bg, 8%);
+  $tab_selected_hover_bg:   lighten($tab_selected_bg, 8%);
+}
+
+$tab_needs_attention_color: $selected_bg_color;
+
+@mixin undershoot-gradient($dir) {
+  $color: black;
+
+  @if $variant == 'dark' {
+    background: linear-gradient(to #{$dir},
+                                transparentize($color, .6),
+                                transparentize($color, 1) 20px);
+  }
+  @else {
+    background: linear-gradient(to #{$dir},
+                                transparentize($color, .93),
+                                transparentize($color, 1) 20px);
+  }
+}
+
+@mixin need-attention-gradient($dir) {
+  background: linear-gradient(to #{$dir},
+                              transparentize($tab_needs_attention_color, .3),
+                              transparentize($tab_needs_attention_color, .5) 1px,
+                              transparentize($tab_needs_attention_color, 1) 20px);
+}
+
+tabbar {
+  .box {
+    min-height: 38px;
+    background: $tab_bar_bg;
+    border-color: $alt_borders_color;
+    border-style: solid;
+
+    &:backdrop {
+      background-color: $tab_bar_bg_backdrop;
+      border-color: $backdrop_borders_color;
+    }
+  }
+
+  &.top .box {
+    border-bottom-width: 1px;
+  }
+
+  &.bottom .box {
+    border-top-width: 1px;
+  }
+
+  tabbox.pinned {
+    &:dir(ltr) {
+      padding-right: 1px;
+      box-shadow: inset -1px 0 $alt_borders_color;
+
+      &:backdrop {
+        box-shadow: inset -1px 0 $backdrop_borders_color;
+      }
+    }
+
+    &:dir(rtl) {
+      padding-left: 1px;
+      box-shadow: inset 1px 0 $alt_borders_color;
+
+      &:backdrop {
+        box-shadow: inset 1px 0 $backdrop_borders_color;
+      }
+    }
+  }
+
+  undershoot {
+    &.left, &.right {
+      transition: all 200ms ease;
+    }
+
+    &.left {
+      @include undershoot-gradient("right");
+    }
+
+    &.right {
+      @include undershoot-gradient("left");
+    }
+  }
+
+  &.needs-attention-left undershoot.left {
+    @include need-attention-gradient("right");
+  }
+
+  &.needs-attention-right undershoot.right {
+    @include need-attention-gradient("left");
+  }
+
+  tab {
+    min-width: 130px;
+    border-style: solid;
+    border-color: $alt_borders_color;
+    border-width: 0 1px 0 1px;
+    background-color: $tab_bg;
+    transition: background 150ms ease-in-out;
+
+    &.pinned {
+      min-width: 40px;
+    }
+
+    &:hover {
+      background-color: $tab_hover_bg;
+    }
+
+    &:checked {
+      background-color: $tab_selected_bg;
+
+      &:hover {
+        background-color: $tab_selected_hover_bg;
+      }
+    }
+
+    &:backdrop {
+      border-color: $backdrop_borders_color;
+      background-color: $tab_bg_backdrop;
+
+      &:checked {
+        background-color: $tab_selected_bg_backdrop;
+      }
+    }
+
+    &.needs-attention {
+      background-image:
+        radial-gradient(ellipse at bottom,
+                        transparentize(white, .2),
+                        transparentize($tab_needs_attention_color, .8) 15%,
+                        transparentize($tab_needs_attention_color, 1) 15%);
+    }
+
+    .tab-contents {
+      padding: 6px;
+    }
+
+    .tab-close-button {
+      margin: 0;
+      padding: 0;
+      border-radius: 9999px;
+
+      &:not(:hover) {
+        border-color: transparent;
+      }
+    }
+  }
+
+  .start-action,
+  .end-action {
+    background: $tab_bg;
+    border-color: $alt_borders_color;
+    border-style: solid;
+    transition: background 150ms ease-in-out;
+
+    &:backdrop {
+      border-color: $backdrop_borders_color;
+      background-color: $tab_bg_backdrop;
+    }
+
+    button {
+      border: none;
+      border-radius: 0;
+    }
+  }
+
+  .start-action:dir(ltr),
+  .end-action:dir(rtl) {
+    border-right-width: 1px;
+
+    > * {
+      margin-right: 1px;
+    }
+  }
+
+  .start-action:dir(rtl),
+  .end-action:dir(ltr) {
+    border-left-width: 1px;
+
+    > * {
+      margin-left: 1px;
+    }
+  }
+}
+
+.tab-drag-icon {
+  tab {
+    min-height: 38px;
+    background-color: $tab_selected_hover_bg;
+
+    $_wm_border: if($variant=='light', transparentize(black, 0.77), transparentize($borders_color, 0.1));
+
+    box-shadow: 0 3px 9px 1px transparentize(black, 0.5),
+                0 0 0 1px $_wm_border; //doing borders with box-shadow
+
+    margin: 25px;
+
+    &.needs-attention {
+      background-image:
+        radial-gradient(ellipse at bottom,
+                        transparentize(white, .2),
+                        transparentize($tab_needs_attention_color, .8) 15%,
+                        transparentize($tab_needs_attention_color, 1) 15%);
+    }
+  }
+}

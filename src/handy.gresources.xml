@@ -3,6 +3,7 @@
   <gresource prefix="/sm/puri/handy">
     <file preprocess="xml-stripblanks">icons/avatar-default-symbolic.svg</file>
     <file preprocess="xml-stripblanks">icons/hdy-expander-arrow-symbolic.svg</file>
+    <file preprocess="xml-stripblanks">icons/hdy-tab-icon-missing-symbolic.svg</file>
     <file compressed="true">themes/Adwaita.css</file>
     <file compressed="true">themes/Adwaita-dark.css</file>
     <file compressed="true">themes/fallback.css</file>
@@ -21,6 +22,8 @@
     <file preprocess="xml-stripblanks">hdy-preferences-page.ui</file>
     <file preprocess="xml-stripblanks">hdy-preferences-window.ui</file>
     <file preprocess="xml-stripblanks">hdy-search-bar.ui</file>
+    <file preprocess="xml-stripblanks">hdy-tab.ui</file>
+    <file preprocess="xml-stripblanks">hdy-tab-bar.ui</file>
     <file preprocess="xml-stripblanks">hdy-view-switcher-bar.ui</file>
     <file preprocess="xml-stripblanks">hdy-view-switcher-button.ui</file>
     <file preprocess="xml-stripblanks">hdy-view-switcher-title.ui</file>
