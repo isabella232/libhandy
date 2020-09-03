@@ -1989,14 +1989,19 @@ guint
 hdy_tab_view_get_page_position (HdyTabView *self,
                                 HdyTabPage *page)
 {
-  guint pos;
+  guint i;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), 0);
   g_return_val_if_fail (HDY_IS_TAB_PAGE (page), 0);
 
-  g_return_val_if_fail (g_list_store_find (self->pages, page, &pos), 0);
+  for (i = 0; i < self->n_pages; i++) {
+    HdyTabPage *p = hdy_tab_view_get_nth_page (self, i);
 
-  return pos;
+    if (page == p)
+      return i;
+  }
+
+  return 0;
 }
 
 /**
