@@ -697,20 +697,14 @@ hdy_tab_get_child (HdyTab *self)
 gint
 hdy_tab_get_child_min_width (HdyTab *self)
 {
-  GtkStyleContext *context = gtk_widget_get_style_context (GTK_WIDGET (self));
-  GtkStateFlags flags = gtk_widget_get_state_flags (GTK_WIDGET (self));
-  gint min, css_width;
+  gint min = 0;
 
   if (self->child)
     gtk_widget_get_preferred_width (self->child, &min, NULL);
-  else
-    min = 0;
 
-  gtk_style_context_get (context, flags,
-                         "min-width", &css_width,
-                         NULL);
+  hdy_css_measure (GTK_WIDGET (self), GTK_ORIENTATION_HORIZONTAL, &min, NULL);
 
-  return MAX (min, css_width);
+  return min;
 }
 
 gint
