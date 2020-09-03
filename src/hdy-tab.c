@@ -21,6 +21,7 @@ struct _HdyTab
   GtkStack *icon_stack;
   GtkStack *pinned_icon_stack;
   GtkImage *secondary_icon;
+  GtkImage *pinned_secondary_icon;
 
   GtkWidget *child;
   GdkWindow *window;
@@ -88,13 +89,18 @@ static void
 update_icon (HdyTab *self)
 {
   GIcon *gicon = hdy_tab_page_get_icon (self->page);
+  GIcon *secondary_gicon = hdy_tab_page_get_secondary_icon (self->page);
   gboolean loading = hdy_tab_page_get_loading (self->page);
   const gchar *name = loading ? "spinner" : "icon";
+  const gchar *pinned_name = secondary_gicon ? "secondary-icon" : name;
 
   gtk_image_set_from_gicon (self->icon, gicon, GTK_ICON_SIZE_BUTTON);
   gtk_widget_set_visible (GTK_WIDGET (self->icon_stack),
                           gicon != NULL || loading);
   gtk_stack_set_visible_child_name (self->icon_stack, name);
+
+  gtk_image_set_from_gicon (self->secondary_icon, secondary_gicon, GTK_ICON_SIZE_BUTTON);
+  gtk_widget_set_visible (GTK_WIDGET (self->secondary_icon), secondary_gicon != NULL);
 
   if (gicon)
     gtk_image_set_from_gicon (self->pinned_icon, gicon, GTK_ICON_SIZE_BUTTON);
@@ -104,16 +110,8 @@ update_icon (HdyTab *self)
     gtk_image_set_from_gicon (self->pinned_icon, gicon, GTK_ICON_SIZE_BUTTON);
   }
 
-  gtk_stack_set_visible_child_name (self->pinned_icon_stack, name);
-}
-
-static void
-update_secondary_icon (HdyTab *self)
-{
-  GIcon *gicon = hdy_tab_page_get_secondary_icon (self->page);
-
-  gtk_image_set_from_gicon (self->secondary_icon, gicon, GTK_ICON_SIZE_BUTTON);
-  gtk_widget_set_visible (GTK_WIDGET (self->secondary_icon), gicon != NULL);
+  gtk_image_set_from_gicon (self->pinned_secondary_icon, secondary_gicon, GTK_ICON_SIZE_BUTTON);
+  gtk_stack_set_visible_child_name (self->pinned_icon_stack, pinned_name);
 }
 
 static void
@@ -604,6 +602,7 @@ hdy_tab_class_init (HdyTabClass *klass)
   gtk_widget_class_bind_template_child (widget_class, HdyTab, icon_stack);
   gtk_widget_class_bind_template_child (widget_class, HdyTab, pinned_icon_stack);
   gtk_widget_class_bind_template_child (widget_class, HdyTab, secondary_icon);
+  gtk_widget_class_bind_template_child (widget_class, HdyTab, pinned_secondary_icon);
   gtk_widget_class_bind_template_callback (widget_class, close_clicked_cb);
 
   gtk_widget_class_set_css_name (widget_class, "tab");
@@ -639,7 +638,6 @@ hdy_tab_set_page (HdyTab     *self,
   if (self->page) {
     g_signal_handlers_disconnect_by_func (self->page, update_tooltip, self);
     g_signal_handlers_disconnect_by_func (self->page, update_icon, self);
-    g_signal_handlers_disconnect_by_func (self->page, update_secondary_icon, self);
     g_signal_handlers_disconnect_by_func (self->page, update_needs_attention, self);
     g_signal_handlers_disconnect_by_func (self->page, update_loading, self);
     g_clear_pointer (&self->selected_binding, g_binding_unbind);
@@ -652,7 +650,6 @@ hdy_tab_set_page (HdyTab     *self,
     update_state (self);
     update_tooltip (self);
     update_icon (self);
-    update_secondary_icon (self);
     update_needs_attention (self);
     update_loading (self);
 
@@ -666,7 +663,7 @@ hdy_tab_set_page (HdyTab     *self,
                              G_CALLBACK (update_icon), self,
                              G_CONNECT_SWAPPED);
     g_signal_connect_object (self->page, "notify::secondary-icon",
-                             G_CALLBACK (update_secondary_icon), self,
+                             G_CALLBACK (update_icon), self,
                              G_CONNECT_SWAPPED);
     g_signal_connect_object (self->page, "notify::needs-attention",
                              G_CALLBACK (update_needs_attention), self,

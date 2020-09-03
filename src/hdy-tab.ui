@@ -124,6 +124,17 @@
                 <property name="name">spinner</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkImage" id="pinned_secondary_icon">
+                <property name="visible">True</property>
+                <style>
+                  <class name="tab-secondary-icon"/>
+                </style>
+              </object>
+              <packing>
+                <property name="name">secondary-icon</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="name">pinned</property>
