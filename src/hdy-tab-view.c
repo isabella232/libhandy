@@ -696,6 +696,17 @@ hdy_tab_view_dispose (GObject *object)
 }
 
 static void
+hdy_tab_view_finalize (GObject *object)
+{
+  HdyTabView *self = (HdyTabView *) object;
+
+  g_clear_object (&self->default_icon);
+  g_clear_object (&self->menu_model);
+
+  G_OBJECT_CLASS (hdy_tab_view_parent_class)->finalize (object);
+}
+
+static void
 hdy_tab_view_get_property (GObject    *object,
                            guint       prop_id,
                            GValue     *value,
@@ -771,6 +782,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
   GtkBindingSet *binding_set;
 
   object_class->dispose = hdy_tab_view_dispose;
+  object_class->finalize = hdy_tab_view_finalize;
   object_class->get_property = hdy_tab_view_get_property;
   object_class->set_property = hdy_tab_view_set_property;
 
@@ -2528,4 +2540,3 @@ hdy_tab_view_get_pages (HdyTabView *self)
 
   return G_LIST_MODEL (self->pages);
 }
-
