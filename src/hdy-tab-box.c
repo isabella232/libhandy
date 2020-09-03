@@ -2949,6 +2949,7 @@ hdy_tab_box_finalize (GObject *object)
   HdyTabBox *self = (HdyTabBox *) object;
 
   g_clear_object (&self->touch_menu_gesture);
+  g_clear_pointer (&self->source_targets, gtk_target_list_unref);
 
   G_OBJECT_CLASS (hdy_tab_box_parent_class)->finalize (object);
 }
