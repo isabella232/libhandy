@@ -10,6 +10,27 @@
 #include "hdy-tab-bar-private.h"
 #include "hdy-tab-box-private.h"
 
+/**
+ * SECTION:hdy-tab-bar
+ * @short_description: TBD
+ * @title: HdyTabBar
+ * @See_also: #HdyTabView
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
+
+/**
+ * HdyTabBarPosition:
+ * @HDY_TAB_BAR_POSITION_TOP: TBD
+ * @HDY_TAB_BAR_POSITION_BOTTOM: TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
+
 struct _HdyTabBar
 {
   GtkBin parent_instance;
@@ -344,6 +365,13 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
 
   container_class->forall = hdy_tab_bar_forall;
 
+  /**
+   * HdyTabBar:view:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   props[PROP_VIEW] =
     g_param_spec_object ("view",
                          _("View"),
@@ -351,6 +379,13 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
                          HDY_TYPE_TAB_VIEW,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabBar:start-action-widget:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   props[PROP_START_ACTION_WIDGET] =
     g_param_spec_object ("start-action-widget",
                          _("Start Action Widget"),
@@ -358,6 +393,13 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
                          GTK_TYPE_WIDGET,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabBar:end-action-widget:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   props[PROP_END_ACTION_WIDGET] =
     g_param_spec_object ("end-action-widget",
                          _("End Action Widget"),
@@ -365,6 +407,13 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
                          GTK_TYPE_WIDGET,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabBar:position:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   props[PROP_POSITION] =
     g_param_spec_enum ("position",
                        _("Position"),
@@ -449,12 +498,31 @@ hdy_tab_bar_tabs_have_visible_focus (HdyTabBar *self)
   return FALSE;
 }
 
+/**
+ * hdy_tab_bar_new:
+ *
+ * Creates a new #HdyTabBar widget.
+ *
+ * Returns: a new #HdyTabBar
+ *
+ * Since: 1.2
+ */
 HdyTabBar *
 hdy_tab_bar_new (void)
 {
   return g_object_new (HDY_TYPE_TAB_BAR, NULL);
 }
 
+/**
+ * hdy_tab_bar_get_view:
+ * @self: a #HdyTabBar
+ *
+ * TBD
+ *
+ * Returns: (transfer none) (nullable): TBD
+ *
+ * Since: 1.2
+ */
 HdyTabView *
 hdy_tab_bar_get_view (HdyTabBar *self)
 {
@@ -463,6 +531,15 @@ hdy_tab_bar_get_view (HdyTabBar *self)
   return self->view;
 }
 
+/**
+ * hdy_tab_bar_set_view:
+ * @self: a #HdyTabBar
+ * @view: (nullable): TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_bar_set_view (HdyTabBar  *self,
                       HdyTabView *view)
@@ -514,6 +591,16 @@ hdy_tab_bar_set_view (HdyTabBar  *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_VIEW]);
 }
 
+/**
+ * hdy_tab_bar_get_start_action_widget:
+ * @self: a #HdyTabBar
+ *
+ * TBD
+ *
+ * Returns: (transfer none) (nullable): TBD
+ *
+ * Since: 1.2
+ */
 GtkWidget *
 hdy_tab_bar_get_start_action_widget (HdyTabBar *self)
 {
@@ -522,6 +609,15 @@ hdy_tab_bar_get_start_action_widget (HdyTabBar *self)
   return gtk_bin_get_child (self->start_action_bin);
 }
 
+/**
+ * hdy_tab_bar_set_start_action_widget:
+ * @self: a #HdyTabBar
+ * @widget: (transfer none) (nullable): TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_bar_set_start_action_widget (HdyTabBar *self,
                                      GtkWidget *widget)
@@ -545,6 +641,16 @@ hdy_tab_bar_set_start_action_widget (HdyTabBar *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_START_ACTION_WIDGET]);
 }
 
+/**
+ * hdy_tab_bar_get_end_action_widget:
+ * @self: a #HdyTabBar
+ *
+ * TBD
+ *
+ * Returns: (transfer none) (nullable): TBD
+ *
+ * Since: 1.2
+ */
 GtkWidget *
 hdy_tab_bar_get_end_action_widget (HdyTabBar *self)
 {
@@ -553,6 +659,15 @@ hdy_tab_bar_get_end_action_widget (HdyTabBar *self)
   return gtk_bin_get_child (self->end_action_bin);
 }
 
+/**
+ * hdy_tab_bar_set_end_action_widget:
+ * @self: a #HdyTabBar
+ * @widget: (transfer none) (nullable): TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_bar_set_end_action_widget (HdyTabBar *self,
                                    GtkWidget *widget)
@@ -576,6 +691,16 @@ hdy_tab_bar_set_end_action_widget (HdyTabBar *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_END_ACTION_WIDGET]);
 }
 
+/**
+ * hdy_tab_bar_get_position:
+ * @self: a #HdyTabBar
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 HdyTabBarPosition
 hdy_tab_bar_get_position (HdyTabBar *self)
 {
@@ -584,6 +709,15 @@ hdy_tab_bar_get_position (HdyTabBar *self)
   return self->position;
 }
 
+/**
+ * hdy_tab_bar_set_position:
+ * @self: a #HdyTabBar
+ * @position: TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_bar_set_position (HdyTabBar         *self,
                           HdyTabBarPosition  position)

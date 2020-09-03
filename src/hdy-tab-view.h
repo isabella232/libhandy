@@ -40,7 +40,7 @@ HDY_AVAILABLE_IN_ALL
 const gchar *hdy_tab_page_get_tooltip (HdyTabPage  *self);
 HDY_AVAILABLE_IN_ALL
 void         hdy_tab_page_set_tooltip (HdyTabPage  *self,
-                                       const gchar *title);
+                                       const gchar *tooltip);
 
 HDY_AVAILABLE_IN_ALL
 GIcon *hdy_tab_page_get_icon (HdyTabPage *self);

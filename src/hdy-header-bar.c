@@ -1545,7 +1545,6 @@ hdy_header_bar_destroy (GtkWidget *widget)
 {
   HdyHeaderBarPrivate *priv = hdy_header_bar_get_instance_private (HDY_HEADER_BAR (widget));
 
-  g_print ("destroy?\n");
   if (priv->label_sizing_box) {
     gtk_widget_destroy (priv->label_sizing_box);
     g_clear_object (&priv->label_sizing_box);

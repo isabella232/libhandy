@@ -13,6 +13,17 @@ static const GtkTargetEntry dst_targets [] = {
   { "HDY_TAB", GTK_TARGET_SAME_APP, 0 },
 };
 
+/**
+ * SECTION:hdy-tab-view
+ * @short_description: TBD
+ * @title: HdyTabView
+ * @See_also: #HdyTabBar
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
+
 struct _HdyTabPage
 {
   GObject parent_instance;
@@ -251,6 +262,13 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
   object_class->get_property = hdy_tab_page_get_property;
   object_class->set_property = hdy_tab_page_set_property;
 
+  /**
+   * HdyTabPage:content:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   page_props[PAGE_PROP_CONTENT] =
     g_param_spec_object ("content",
                          _("Content"),
@@ -258,6 +276,13 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
                          GTK_TYPE_WIDGET,
                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
 
+  /**
+   * HdyTabPage:selected:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   page_props[PAGE_PROP_SELECTED] =
     g_param_spec_boolean ("selected",
                          _("Selected"),
@@ -265,6 +290,13 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
                          FALSE,
                          G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabPage:pinned:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   page_props[PAGE_PROP_PINNED] =
     g_param_spec_boolean ("pinned",
                          _("Pinned"),
@@ -272,6 +304,13 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
                          FALSE,
                          G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabPage:title:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   page_props[PAGE_PROP_TITLE] =
     g_param_spec_string ("title",
                          _("Title"),
@@ -279,6 +318,13 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
                          NULL,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabPage:tooltip:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   page_props[PAGE_PROP_TOOLTIP] =
     g_param_spec_string ("tooltip",
                          _("Tooltip"),
@@ -286,6 +332,13 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
                          NULL,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabPage:icon:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   page_props[PAGE_PROP_ICON] =
     g_param_spec_object ("icon",
                          _("Icon"),
@@ -293,6 +346,13 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
                          G_TYPE_ICON,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabPage:loading:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   page_props[PAGE_PROP_LOADING] =
     g_param_spec_boolean ("loading",
                          _("Loading"),
@@ -300,6 +360,13 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
                          FALSE,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabPage:secondary-icon:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   page_props[PAGE_PROP_SECONDARY_ICON] =
     g_param_spec_object ("secondary-icon",
                          _("Secondary Icon"),
@@ -307,6 +374,13 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
                          G_TYPE_ICON,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabPage:needs-attention:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   page_props[PAGE_PROP_NEEDS_ATTENTION] =
     g_param_spec_boolean ("needs-attention",
                          _("Needs Attention"),
@@ -700,6 +774,13 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
   object_class->get_property = hdy_tab_view_get_property;
   object_class->set_property = hdy_tab_view_set_property;
 
+  /**
+   * HdyTabView:n-pages:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   props[PROP_N_PAGES] =
     g_param_spec_uint ("n-pages",
                        _("Number of Pages"),
@@ -707,6 +788,13 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                        0, G_MAXUINT, 0,
                        G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabView:n-pinned-pages:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   props[PROP_N_PINNED_PAGES] =
     g_param_spec_uint ("n-pinned-pages",
                        _("Number of Pinned Pages"),
@@ -714,6 +802,13 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                        0, G_MAXUINT, 0,
                        G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabView:is-dragging:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   props[PROP_IS_DRAGGING] =
     g_param_spec_boolean ("is-dragging",
                           _("Is Dragging"),
@@ -721,6 +816,13 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                           FALSE,
                           G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabView:selected-page:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   props[PROP_SELECTED_PAGE] =
     g_param_spec_object ("selected-page",
                          _("Selected Page"),
@@ -728,6 +830,13 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                          HDY_TYPE_TAB_PAGE,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabView:default-icon:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   props[PROP_DEFAULT_ICON] =
     g_param_spec_object ("default-icon",
                          _("Default Icon"),
@@ -735,6 +844,13 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                          G_TYPE_ICON,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabView:menu-model:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   props[PROP_MENU_MODEL] =
     g_param_spec_object ("menu-model",
                          _("Menu Model"),
@@ -742,6 +858,13 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                          G_TYPE_MENU_MODEL,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabView:group:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   props[PROP_GROUP] =
     g_param_spec_object ("group",
                          _("Group"),
@@ -751,6 +874,16 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
+  /**
+   * HdyTabView::page-added:
+   * @self: a #HdyTabView
+   * @page: TBD
+   * @position: TBD
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   signals[SIGNAL_PAGE_ADDED] =
     g_signal_new ("page-added",
                   G_TYPE_FROM_CLASS (klass),
@@ -761,6 +894,15 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                   2,
                   HDY_TYPE_TAB_PAGE, G_TYPE_UINT);
 
+  /**
+   * HdyTabView::page-removed:
+   * @self: a #HdyTabView
+   * @page: TBD
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   signals[SIGNAL_PAGE_REMOVED] =
     g_signal_new ("page-removed",
                   G_TYPE_FROM_CLASS (klass),
@@ -771,6 +913,16 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                   1,
                   HDY_TYPE_TAB_PAGE);
 
+  /**
+   * HdyTabView::page-reordered:
+   * @self: a #HdyTabView
+   * @page: TBD
+   * @position: TBD
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   signals[SIGNAL_PAGE_REORDERED] =
     g_signal_new ("page-reordered",
                   G_TYPE_FROM_CLASS (klass),
@@ -781,6 +933,15 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                   2,
                   HDY_TYPE_TAB_PAGE, G_TYPE_UINT);
 
+  /**
+   * HdyTabView::page-pinned:
+   * @self: a #HdyTabView
+   * @page: TBD
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   signals[SIGNAL_PAGE_PINNED] =
     g_signal_new ("page-pinned",
                   G_TYPE_FROM_CLASS (klass),
@@ -791,6 +952,15 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                   1,
                   HDY_TYPE_TAB_PAGE);
 
+  /**
+   * HdyTabView::page-unpinned:
+   * @self: a #HdyTabView
+   * @page: TBD
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   signals[SIGNAL_PAGE_UNPINNED] =
     g_signal_new ("page-unpinned",
                   G_TYPE_FROM_CLASS (klass),
@@ -801,6 +971,15 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                   1,
                   HDY_TYPE_TAB_PAGE);
 
+  /**
+   * HdyTabView::setup-menu:
+   * @self: a #HdyTabView
+   * @page: TBD
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
   signals[SIGNAL_SETUP_MENU] =
     g_signal_new ("setup-menu",
                   G_TYPE_FROM_CLASS (klass),
@@ -811,6 +990,16 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                   1,
                   HDY_TYPE_TAB_PAGE);
 
+  /**
+   * HdyTabView::create-window:
+   * @self: a #HdyTabView
+   *
+   * TBD
+   *
+   * Returns: (transfer none) (nullable): TBD
+   *
+   * Since: 1.2
+   */
   signals[SIGNAL_CREATE_WINDOW] =
     g_signal_new ("create-window",
                   G_TYPE_FROM_CLASS (klass),
@@ -889,6 +1078,16 @@ hdy_tab_view_init (HdyTabView *self)
   g_signal_connect_object (self, "reorder-page", G_CALLBACK (reorder_page_cb), self, 0);
 }
 
+/**
+ * hdy_tab_page_get_content:
+ * @self: a #HdyTabPage
+ *
+ * TBD
+ *
+ * Returns: (transfer none): TBD
+ *
+ * Since: 1.2
+ */
 GtkWidget *
 hdy_tab_page_get_content (HdyTabPage *self)
 {
@@ -897,6 +1096,16 @@ hdy_tab_page_get_content (HdyTabPage *self)
   return self->content;
 }
 
+/**
+ * hdy_tab_page_get_selected:
+ * @self: a #HdyTabPage
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_page_get_selected (HdyTabPage *self)
 {
@@ -905,6 +1114,16 @@ hdy_tab_page_get_selected (HdyTabPage *self)
   return self->selected;
 }
 
+/**
+ * hdy_tab_page_get_pinned:
+ * @self: a #HdyTabPage
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_page_get_pinned (HdyTabPage *self)
 {
@@ -913,6 +1132,16 @@ hdy_tab_page_get_pinned (HdyTabPage *self)
   return self->pinned;
 }
 
+/**
+ * hdy_tab_page_get_title:
+ * @self: a #HdyTabPage
+ *
+ * TBD
+ *
+ * Returns: (nullable): TBD
+ *
+ * Since: 1.2
+ */
 const gchar *
 hdy_tab_page_get_title (HdyTabPage *self)
 {
@@ -921,6 +1150,15 @@ hdy_tab_page_get_title (HdyTabPage *self)
   return self->title;
 }
 
+/**
+ * hdy_tab_page_set_title:
+ * @self: a #HdyTabPage
+ * @title: (nullable): TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_page_set_title (HdyTabPage  *self,
                         const gchar *title)
@@ -939,6 +1177,16 @@ hdy_tab_page_set_title (HdyTabPage  *self,
   g_object_notify_by_pspec (G_OBJECT (self), page_props[PAGE_PROP_TITLE]);
 }
 
+/**
+ * hdy_tab_page_get_tooltip:
+ * @self: a #HdyTabPage
+ *
+ * TBD
+ *
+ * Returns: (nullable): TBD
+ *
+ * Since: 1.2
+ */
 const gchar *
 hdy_tab_page_get_tooltip (HdyTabPage *self)
 {
@@ -947,6 +1195,15 @@ hdy_tab_page_get_tooltip (HdyTabPage *self)
   return self->tooltip;
 }
 
+/**
+ * hdy_tab_page_set_tooltip:
+ * @self: a #HdyTabPage
+ * @tooltip: (nullable): TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_page_set_tooltip (HdyTabPage  *self,
                           const gchar *tooltip)
@@ -965,6 +1222,16 @@ hdy_tab_page_set_tooltip (HdyTabPage  *self,
   g_object_notify_by_pspec (G_OBJECT (self), page_props[PAGE_PROP_TOOLTIP]);
 }
 
+/**
+ * hdy_tab_page_get_icon:
+ * @self: a #HdyTabPage
+ *
+ * TBD
+ *
+ * Returns: (transfer none) (nullable): TBD
+ *
+ * Since: 1.2
+ */
 GIcon *
 hdy_tab_page_get_icon (HdyTabPage *self)
 {
@@ -973,6 +1240,15 @@ hdy_tab_page_get_icon (HdyTabPage *self)
   return self->icon;
 }
 
+/**
+ * hdy_tab_page_set_icon:
+ * @self: a #HdyTabPage
+ * @icon: (nullable): TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_page_set_icon (HdyTabPage *self,
                        GIcon      *icon)
@@ -988,6 +1264,16 @@ hdy_tab_page_set_icon (HdyTabPage *self,
   g_object_notify_by_pspec (G_OBJECT (self), page_props[PAGE_PROP_ICON]);
 }
 
+/**
+ * hdy_tab_page_get_loading:
+ * @self: a #HdyTabPage
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_page_get_loading (HdyTabPage *self)
 {
@@ -996,6 +1282,15 @@ hdy_tab_page_get_loading (HdyTabPage *self)
   return self->loading;
 }
 
+/**
+ * hdy_tab_page_set_loading:
+ * @self: a #HdyTabPage
+ * @loading: TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_page_set_loading (HdyTabPage *self,
                           gboolean    loading)
@@ -1012,6 +1307,16 @@ hdy_tab_page_set_loading (HdyTabPage *self,
   g_object_notify_by_pspec (G_OBJECT (self), page_props[PAGE_PROP_LOADING]);
 }
 
+/**
+ * hdy_tab_page_get_secondary_icon:
+ * @self: a #HdyTabPage
+ *
+ * TBD
+ *
+ * Returns: (transfer none) (nullable): TBD
+ *
+ * Since: 1.2
+ */
 GIcon *
 hdy_tab_page_get_secondary_icon (HdyTabPage *self)
 {
@@ -1020,6 +1325,15 @@ hdy_tab_page_get_secondary_icon (HdyTabPage *self)
   return self->secondary_icon;
 }
 
+/**
+ * hdy_tab_page_set_secondary_icon:
+ * @self: a #HdyTabPage
+ * @secondary_icon: (nullable): TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_page_set_secondary_icon (HdyTabPage *self,
                                  GIcon      *secondary_icon)
@@ -1035,6 +1349,16 @@ hdy_tab_page_set_secondary_icon (HdyTabPage *self,
   g_object_notify_by_pspec (G_OBJECT (self), page_props[PAGE_PROP_SECONDARY_ICON]);
 }
 
+/**
+ * hdy_tab_page_get_needs_attention:
+ * @self: a #HdyTabPage
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_page_get_needs_attention (HdyTabPage *self)
 {
@@ -1043,6 +1367,15 @@ hdy_tab_page_get_needs_attention (HdyTabPage *self)
   return self->needs_attention;
 }
 
+/**
+ * hdy_tab_page_set_needs_attention:
+ * @self: a #HdyTabPage
+ * @needs_attention: TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_page_set_needs_attention (HdyTabPage *self,
                                   gboolean    needs_attention)
@@ -1059,12 +1392,31 @@ hdy_tab_page_set_needs_attention (HdyTabPage *self,
   g_object_notify_by_pspec (G_OBJECT (self), page_props[PAGE_PROP_NEEDS_ATTENTION]);
 }
 
+/**
+ * hdy_tab_view_new:
+ *
+ * Creates a new #HdyTabView widget.
+ *
+ * Returns: a new #HdyTabView
+ *
+ * Since: 1.2
+ */
 HdyTabView *
 hdy_tab_view_new (void)
 {
   return g_object_new (HDY_TYPE_TAB_VIEW, NULL);
 }
 
+/**
+ * hdy_tab_view_get_n_pages:
+ * @self: a #HdyTabView
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 guint
 hdy_tab_view_get_n_pages (HdyTabView *self)
 {
@@ -1073,6 +1425,16 @@ hdy_tab_view_get_n_pages (HdyTabView *self)
   return self->n_pages;
 }
 
+/**
+ * hdy_tab_view_get_n_pinned_pages:
+ * @self: a #HdyTabView
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 guint
 hdy_tab_view_get_n_pinned_pages (HdyTabView *self)
 {
@@ -1081,6 +1443,16 @@ hdy_tab_view_get_n_pinned_pages (HdyTabView *self)
   return self->n_pinned_pages;
 }
 
+/**
+ * hdy_tab_view_get_is_dragging:
+ * @self: a #HdyTabView
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_get_is_dragging (HdyTabView *self)
 {
@@ -1117,6 +1489,16 @@ hdy_tab_view_end_drag (HdyTabView *self)
   }
 }
 
+/**
+ * hdy_tab_view_get_selected_page:
+ * @self: a #HdyTabView
+ *
+ * TBD
+ *
+ * Returns: (transfer none): TBD
+ *
+ * Since: 1.2
+ */
 HdyTabPage *
 hdy_tab_view_get_selected_page (HdyTabView *self)
 {
@@ -1125,6 +1507,15 @@ hdy_tab_view_get_selected_page (HdyTabView *self)
   return self->selected_page;
 }
 
+/**
+ * hdy_tab_view_set_selected_page:
+ * @self: a #HdyTabView
+ * @selected_page: TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_view_set_selected_page (HdyTabView *self,
                                 HdyTabPage *selected_page)
@@ -1148,6 +1539,16 @@ hdy_tab_view_set_selected_page (HdyTabView *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SELECTED_PAGE]);
 }
 
+/**
+ * hdy_tab_view_select_previous_page:
+ * @self: a #HdyTabView
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_select_previous_page (HdyTabView *self)
 {
@@ -1171,6 +1572,16 @@ hdy_tab_view_select_previous_page (HdyTabView *self)
   return TRUE;
 }
 
+/**
+ * hdy_tab_view_select_next_page:
+ * @self: a #HdyTabView
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_select_next_page (HdyTabView *self)
 {
@@ -1194,6 +1605,16 @@ hdy_tab_view_select_next_page (HdyTabView *self)
   return TRUE;
 }
 
+/**
+ * hdy_tab_view_select_first_page:
+ * @self: a #HdyTabView
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_select_first_page (HdyTabView *self)
 {
@@ -1223,6 +1644,16 @@ hdy_tab_view_select_first_page (HdyTabView *self)
   return TRUE;
 }
 
+/**
+ * hdy_tab_view_select_last_page:
+ * @self: a #HdyTabView
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_select_last_page (HdyTabView *self)
 {
@@ -1252,6 +1683,16 @@ hdy_tab_view_select_last_page (HdyTabView *self)
   return TRUE;
 }
 
+/**
+ * hdy_tab_view_get_default_icon:
+ * @self: a #HdyTabView
+ *
+ * TBD
+ *
+ * Returns: (transfer none) (nullable): TBD
+ *
+ * Since: 1.2
+ */
 GIcon *
 hdy_tab_view_get_default_icon (HdyTabView *self)
 {
@@ -1260,6 +1701,15 @@ hdy_tab_view_get_default_icon (HdyTabView *self)
   return self->default_icon;
 }
 
+/**
+ * hdy_tab_view_set_default_icon:
+ * @self: a #HdyTabView
+ * @default_icon: (nullable): TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_view_set_default_icon (HdyTabView *self,
                                GIcon      *default_icon)
@@ -1275,6 +1725,16 @@ hdy_tab_view_set_default_icon (HdyTabView *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_DEFAULT_ICON]);
 }
 
+/**
+ * hdy_tab_view_get_menu_model:
+ * @self: a #HdyTabView
+ *
+ * TBD
+ *
+ * Returns: (transfer none) (nullable): TBD
+ *
+ * Since: 1.2
+ */
 GMenuModel *
 hdy_tab_view_get_menu_model (HdyTabView *self)
 {
@@ -1283,6 +1743,15 @@ hdy_tab_view_get_menu_model (HdyTabView *self)
   return self->menu_model;
 }
 
+/**
+ * hdy_tab_view_set_menu_model:
+ * @self: a #HdyTabView
+ * @menu_model: (nullable): TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_view_set_menu_model (HdyTabView *self,
                              GMenuModel *menu_model)
@@ -1298,6 +1767,16 @@ hdy_tab_view_set_menu_model (HdyTabView *self,
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MENU_MODEL]);
 }
 
+/**
+ * hdy_tab_view_get_group:
+ * @self: a #HdyTabView
+ *
+ * TBD
+ *
+ * Returns: (element-type HdyTabView) (nullable) (transfer none): TBD
+ *
+ * Since: 1.2
+ */
 GSList *
 hdy_tab_view_get_group (HdyTabView *self)
 {
@@ -1306,6 +1785,15 @@ hdy_tab_view_get_group (HdyTabView *self)
   return self->group;
 }
 
+/**
+ * hdy_tab_view_set_group:
+ * @self: a #HdyTabView
+ * @group: (element-type HdyTabView) (nullable): TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_view_set_group (HdyTabView *self,
                         GSList     *group)
@@ -1340,6 +1828,15 @@ hdy_tab_view_set_group (HdyTabView *self,
   }
 }
 
+/**
+ * hdy_tab_view_join_group:
+ * @self: a #HdyTabView
+ * @source: TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_view_join_group (HdyTabView *self,
                          HdyTabView *source)
@@ -1360,6 +1857,16 @@ hdy_tab_view_join_group (HdyTabView *self,
     hdy_tab_view_set_group (self, NULL);
 }
 
+/**
+ * hdy_tab_view_set_page_pinned:
+ * @self: a #HdyTabView
+ * @page: TBD
+ * @pinned: TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_view_set_page_pinned (HdyTabView *self,
                               HdyTabPage *page,
@@ -1404,6 +1911,17 @@ hdy_tab_view_set_page_pinned (HdyTabView *self,
     g_signal_emit (self, signals[SIGNAL_PAGE_UNPINNED], 0, page);
 }
 
+/**
+ * hdy_tab_view_get_page:
+ * @self: a #HdyTabView
+ * @content: TBD
+ *
+ * TBD
+ *
+ * Returns: (transfer none): TBD
+ *
+ * Since: 1.2
+ */
 HdyTabPage *
 hdy_tab_view_get_page (HdyTabView *self,
                        GtkWidget  *content)
@@ -1423,6 +1941,17 @@ hdy_tab_view_get_page (HdyTabView *self,
   return NULL;
 }
 
+/**
+ * hdy_tab_view_get_nth_page:
+ * @self: a #HdyTabView
+ * @position: TBD
+ *
+ * TBD
+ *
+ * Returns: (transfer none): TBD
+ *
+ * Since: 1.2
+ */
 HdyTabPage *
 hdy_tab_view_get_nth_page (HdyTabView *self,
                            guint       position)
@@ -1433,6 +1962,17 @@ hdy_tab_view_get_nth_page (HdyTabView *self,
   return g_list_model_get_item (G_LIST_MODEL (self->pages), position);
 }
 
+/**
+ * hdy_tab_view_get_page_position:
+ * @self: a #HdyTabView
+ * @page: TBD
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 guint
 hdy_tab_view_get_page_position (HdyTabView *self,
                                 HdyTabPage *page)
@@ -1447,6 +1987,18 @@ hdy_tab_view_get_page_position (HdyTabView *self,
   return pos;
 }
 
+/**
+ * hdy_tab_view_insert:
+ * @self: a #HdyTabView
+ * @content: TBD
+ * @position: TBD
+ *
+ * TBD
+ *
+ * Returns: (transfer none): TBD
+ *
+ * Since: 1.2
+ */
 HdyTabPage *
 hdy_tab_view_insert (HdyTabView *self,
                      GtkWidget  *content,
@@ -1459,6 +2011,17 @@ hdy_tab_view_insert (HdyTabView *self,
   return insert_page (self, content, position, FALSE);
 }
 
+/**
+ * hdy_tab_view_prepend:
+ * @self: a #HdyTabView
+ * @content: TBD
+ *
+ * TBD
+ *
+ * Returns: (transfer none): TBD
+ *
+ * Since: 1.2
+ */
 HdyTabPage *
 hdy_tab_view_prepend (HdyTabView *self,
                       GtkWidget  *content)
@@ -1469,6 +2032,17 @@ hdy_tab_view_prepend (HdyTabView *self,
   return insert_page (self, content, 0, FALSE);
 }
 
+/**
+ * hdy_tab_view_append:
+ * @self: a #HdyTabView
+ * @content: TBD
+ *
+ * TBD
+ *
+ * Returns: (transfer none): TBD
+ *
+ * Since: 1.2
+ */
 HdyTabPage *
 hdy_tab_view_append (HdyTabView *self,
                      GtkWidget  *content)
@@ -1479,6 +2053,18 @@ hdy_tab_view_append (HdyTabView *self,
   return insert_page (self, content, self->n_pages - self->n_pinned_pages, FALSE);
 }
 
+/**
+ * hdy_tab_view_insert_pinned:
+ * @self: a #HdyTabView
+ * @content: TBD
+ * @position: TBD
+ *
+ * TBD
+ *
+ * Returns: (transfer none): TBD
+ *
+ * Since: 1.2
+ */
 HdyTabPage *
 hdy_tab_view_insert_pinned (HdyTabView *self,
                             GtkWidget  *content,
@@ -1491,6 +2077,17 @@ hdy_tab_view_insert_pinned (HdyTabView *self,
   return insert_page (self, content, position, TRUE);
 }
 
+/**
+ * hdy_tab_view_prepend_pinned:
+ * @self: a #HdyTabView
+ * @content: TBD
+ *
+ * TBD
+ *
+ * Returns: (transfer none): TBD
+ *
+ * Since: 1.2
+ */
 HdyTabPage *
 hdy_tab_view_prepend_pinned (HdyTabView *self,
                              GtkWidget  *content)
@@ -1501,6 +2098,17 @@ hdy_tab_view_prepend_pinned (HdyTabView *self,
   return insert_page (self, content, 0, TRUE);
 }
 
+/**
+ * hdy_tab_view_append_pinned:
+ * @self: a #HdyTabView
+ * @content: TBD
+ *
+ * TBD
+ *
+ * Returns: (transfer none): TBD
+ *
+ * Since: 1.2
+ */
 HdyTabPage *
 hdy_tab_view_append_pinned (HdyTabView *self,
                             GtkWidget  *content)
@@ -1511,6 +2119,17 @@ hdy_tab_view_append_pinned (HdyTabView *self,
   return insert_page (self, content, self->n_pinned_pages, TRUE);
 }
 
+/**
+ * hdy_tab_view_close_page:
+ * @self: a #HdyTabView
+ * @page: TBD
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_close_page (HdyTabView *self,
                          HdyTabPage *page)
@@ -1529,6 +2148,17 @@ hdy_tab_view_close_page (HdyTabView *self,
   return can_close;
 }
 
+/**
+ * hdy_tab_view_close_pages:
+ * @self: a #HdyTabView
+ * @pages: (element-type HdyTabPage) (transfer full): TBD
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_close_pages (HdyTabView *self,
                           GSList     *pages)
@@ -1563,6 +2193,17 @@ hdy_tab_view_close_pages (HdyTabView *self,
   return can_close;
 }
 
+/**
+ * hdy_tab_view_close_other_pages:
+ * @self: a #HdyTabView
+ * @page: TBD
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_close_other_pages (HdyTabView *self,
                                 HdyTabPage *page)
@@ -1587,6 +2228,17 @@ hdy_tab_view_close_other_pages (HdyTabView *self,
   return hdy_tab_view_close_pages (self, pages);
 }
 
+/**
+ * hdy_tab_view_close_pages_before:
+ * @self: a #HdyTabView
+ * @page: TBD
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_close_pages_before (HdyTabView *self,
                                  HdyTabPage *page)
@@ -1610,6 +2262,17 @@ hdy_tab_view_close_pages_before (HdyTabView *self,
   return hdy_tab_view_close_pages (self, pages);
 }
 
+/**
+ * hdy_tab_view_close_pages_after:
+ * @self: a #HdyTabView
+ * @page: TBD
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_close_pages_after (HdyTabView *self,
                                 HdyTabPage *page)
@@ -1634,6 +2297,18 @@ hdy_tab_view_close_pages_after (HdyTabView *self,
   return hdy_tab_view_close_pages (self, pages);
 }
 
+/**
+ * hdy_tab_view_reorder_page:
+ * @self: a #HdyTabView
+ * @page: TBD
+ * @position: TBD
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_reorder_page (HdyTabView *self,
                            HdyTabPage *page,
@@ -1668,6 +2343,17 @@ hdy_tab_view_reorder_page (HdyTabView *self,
   return TRUE;
 }
 
+/**
+ * hdy_tab_view_reorder_backward:
+ * @self: a #HdyTabView
+ * @page: TBD
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_reorder_backward (HdyTabView *self,
                                HdyTabPage *page)
@@ -1689,6 +2375,17 @@ hdy_tab_view_reorder_backward (HdyTabView *self,
   return hdy_tab_view_reorder_page (self, page, pos - 1);
 }
 
+/**
+ * hdy_tab_view_reorder_forward:
+ * @self: a #HdyTabView
+ * @page: TBD
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_reorder_forward (HdyTabView *self,
                               HdyTabPage *page)
@@ -1710,6 +2407,17 @@ hdy_tab_view_reorder_forward (HdyTabView *self,
   return hdy_tab_view_reorder_page (self, page, pos + 1);
 }
 
+/**
+ * hdy_tab_view_reorder_first:
+ * @self: a #HdyTabView
+ * @page: TBD
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_reorder_first (HdyTabView *self,
                             HdyTabPage *page)
@@ -1726,6 +2434,17 @@ hdy_tab_view_reorder_first (HdyTabView *self,
   return hdy_tab_view_reorder_page (self, page, pos);
 }
 
+/**
+ * hdy_tab_view_reorder_last:
+ * @self: a #HdyTabView
+ * @page: TBD
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
 gboolean
 hdy_tab_view_reorder_last (HdyTabView *self,
                            HdyTabPage *page)
@@ -1766,6 +2485,17 @@ hdy_tab_view_attach_page (HdyTabView *self,
   hdy_tab_view_set_selected_page (self, page);
 }
 
+/**
+ * hdy_tab_view_transfer_page:
+ * @self: a #HdyTabView
+ * @page: TBD
+ * @other_view: TBD
+ * @position: TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
 void
 hdy_tab_view_transfer_page (HdyTabView *self,
                             HdyTabPage *page,
@@ -1781,6 +2511,16 @@ hdy_tab_view_transfer_page (HdyTabView *self,
   hdy_tab_view_attach_page (other_view, page, position);
 }
 
+/**
+ * hdy_tab_view_get_pages:
+ * @self: a #HdyTabView
+ *
+ * TBD
+ *
+ * Returns: (transfer none): TBD
+ *
+ * Since: 1.2
+ */
 GListModel *
 hdy_tab_view_get_pages (HdyTabView *self)
 {
