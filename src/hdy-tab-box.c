@@ -432,6 +432,9 @@ resize_animation_done_cb (gpointer user_data)
 {
   HdyTabBox *self = HDY_TAB_BOX (user_data);
 
+  self->end_padding = 0;
+  gtk_widget_queue_resize (GTK_WIDGET (self));
+
   g_clear_object (&self->resize_animation);
 }
 
@@ -1777,6 +1780,7 @@ do_drag_drop (HdyTabBox      *self,
   GdkAtom target, tab_target;
   HdyTabBox *source_tab_box;
   HdyTabPage *page;
+  gint offset;
 
   target = gtk_drag_dest_find_target (GTK_WIDGET (self), context, NULL);
   tab_target = gdk_atom_intern_static_string ("HDY_TAB");
@@ -1790,6 +1794,7 @@ do_drag_drop (HdyTabBox      *self,
     return GDK_EVENT_PROPAGATE;
 
   page = source_tab_box->detached_page;
+  offset = (self->pinned ? 0 : hdy_tab_view_get_n_pinned_pages (self->view));
 
   if (self->reorder_placeholder) {
     replace_placeholder (self, page);
@@ -1797,11 +1802,11 @@ do_drag_drop (HdyTabBox      *self,
 
     g_signal_handlers_block_by_func (self->view, add_page, self);
 
-    hdy_tab_view_attach_page (self->view, page, self->reorder_index);
+    hdy_tab_view_attach_page (self->view, page, self->reorder_index + offset);
 
     g_signal_handlers_unblock_by_func (self->view, add_page, self);
   } else {
-    hdy_tab_view_attach_page (self->view, page, self->reorder_index);
+    hdy_tab_view_attach_page (self->view, page, self->reorder_index + offset);
   }
 
   source_tab_box->detached_page = NULL;
@@ -2718,7 +2723,7 @@ hdy_tab_box_drag_begin (GtkWidget      *widget,
   update_hover (self);
 
   gtk_widget_hide (GTK_WIDGET (detached_tab->tab));
-  self->detached_index = g_list_index (self->tabs, detached_tab);
+  self->detached_index = hdy_tab_view_get_page_position (self->view, detached_tab->page);
 
   hdy_tab_view_start_drag (self->view);
   hdy_tab_view_detach_page (self->view, self->detached_page);

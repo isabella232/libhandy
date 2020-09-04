@@ -494,9 +494,6 @@ attach_page (HdyTabView *self,
   gboolean pinned = hdy_tab_page_get_pinned (page);
   GtkWidget *content = hdy_tab_page_get_content (page);
 
-  if (!pinned)
-    position += self->n_pinned_pages;
-
   g_list_store_insert (self->pages, position, page);
 
   gtk_container_add (GTK_CONTAINER (self->stack), content);
@@ -541,11 +538,7 @@ insert_page (HdyTabView *self,
              gint        position,
              gboolean    pinned)
 {
-  HdyTabPage *page;
-
-  g_assert (position <= self->n_pages);
-
-  page = g_object_new (HDY_TYPE_TAB_PAGE, "content", content, NULL);
+  HdyTabPage *page = g_object_new (HDY_TYPE_TAB_PAGE, "content", content, NULL);
 
   set_page_pinned (page, pinned);
 
@@ -2111,7 +2104,7 @@ hdy_tab_view_insert (HdyTabView *self,
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
-  g_return_val_if_fail (position >= 0, NULL);
+  g_return_val_if_fail (position >= self->n_pinned_pages, NULL);
   g_return_val_if_fail (position <= self->n_pages, NULL);
 
   return insert_page (self, content, position, FALSE);
@@ -2135,7 +2128,7 @@ hdy_tab_view_prepend (HdyTabView *self,
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
 
-  return insert_page (self, content, 0, FALSE);
+  return insert_page (self, content, self->n_pinned_pages, FALSE);
 }
 
 /**
@@ -2156,7 +2149,7 @@ hdy_tab_view_append (HdyTabView *self,
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
 
-  return insert_page (self, content, self->n_pages - self->n_pinned_pages, FALSE);
+  return insert_page (self, content, self->n_pages, FALSE);
 }
 
 /**
@@ -2179,7 +2172,7 @@ hdy_tab_view_insert_pinned (HdyTabView *self,
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
   g_return_val_if_fail (position >= 0, NULL);
-  g_return_val_if_fail (position <= self->n_pages, NULL);
+  g_return_val_if_fail (position <= self->n_pinned_pages, NULL);
 
   return insert_page (self, content, position, TRUE);
 }
