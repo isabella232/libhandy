@@ -98,6 +98,7 @@ enum {
   SIGNAL_PAGE_REORDERED,
   SIGNAL_PAGE_PINNED,
   SIGNAL_PAGE_UNPINNED,
+  SIGNAL_CLOSE_PAGE,
   SIGNAL_SETUP_MENU,
   SIGNAL_CREATE_WINDOW,
   SIGNAL_SECONDARY_ICON_ACTIVATED,
@@ -1002,9 +1003,29 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                   HDY_TYPE_TAB_PAGE);
 
   /**
-   * HdyTabView::setup-menu:
+   * HdyTabView::close-page:
    * @self: a #HdyTabView
    * @page: TBD
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
+  signals[SIGNAL_CLOSE_PAGE] =
+    g_signal_new ("close-page",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  g_signal_accumulator_true_handled,
+                  NULL, NULL,
+                  G_TYPE_BOOLEAN,
+                  1,
+                  HDY_TYPE_TAB_PAGE);
+
+  /**
+   * HdyTabView::setup-menu:
+   * @self: a #HdyTabView
+   * @page: (nullable): TBD
    *
    * TBD
    *
@@ -2234,63 +2255,17 @@ gboolean
 hdy_tab_view_close_page (HdyTabView *self,
                          HdyTabPage *page)
 {
-  gboolean can_close;
+  gboolean prevent_closing;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
   g_return_val_if_fail (HDY_IS_TAB_PAGE (page), FALSE);
 
-//  g_signal_emit_by_name (page, "closing", &can_close);
-  can_close = TRUE;
+  g_signal_emit (self, signals[SIGNAL_CLOSE_PAGE], 0, page, &prevent_closing);
 
-  if (can_close)
+  if (!prevent_closing)
     close_page (self, page);
 
-  return can_close;
-}
-
-/**
- * hdy_tab_view_close_pages:
- * @self: a #HdyTabView
- * @pages: (element-type HdyTabPage) (transfer container): TBD
- *
- * TBD
- *
- * Returns: TBD
- *
- * Since: 1.2
- */
-gboolean
-hdy_tab_view_close_pages (HdyTabView *self,
-                          GSList     *pages)
-{
-  gboolean can_close = TRUE;
-  GSList *l;
-
-  g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
-
-  if (!pages)
-    return TRUE;
-
-  for (l = pages; l; l = l->next) {
-    HdyTabPage *page = l->data;
-    gboolean can_close_tab;
-
-//    g_signal_emit_by_name (page, "closing", &can_close_tab);
-    can_close_tab = TRUE;
-
-    can_close &= can_close_tab;
-  }
-
-  if (can_close)
-    for (l = pages; l; l = l->next) {
-      HdyTabPage *page = l->data;
-
-      close_page (self, page);
-    }
-
-  g_free (pages);
-
-  return can_close;
+  return !prevent_closing;
 }
 
 /**
@@ -2300,19 +2275,16 @@ hdy_tab_view_close_pages (HdyTabView *self,
  *
  * TBD
  *
- * Returns: TBD
- *
  * Since: 1.2
  */
-gboolean
+void
 hdy_tab_view_close_other_pages (HdyTabView *self,
                                 HdyTabPage *page)
 {
-  GSList *pages = NULL;
   gint i;
 
-  g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
-  g_return_val_if_fail (HDY_IS_TAB_PAGE (page), FALSE);
+  g_return_if_fail (HDY_IS_TAB_VIEW (self));
+  g_return_if_fail (HDY_IS_TAB_PAGE (page));
 
   for (i = self->n_pages - 1; i >= self->n_pinned_pages; i--) {
     HdyTabPage *p = hdy_tab_view_get_nth_page (self, i);
@@ -2320,10 +2292,8 @@ hdy_tab_view_close_other_pages (HdyTabView *self,
     if (p == page)
       continue;
 
-    pages = g_slist_prepend (pages, p);
+    hdy_tab_view_close_page (self, p);
   }
-
-  return hdy_tab_view_close_pages (self, pages);
 }
 
 /**
@@ -2333,29 +2303,24 @@ hdy_tab_view_close_other_pages (HdyTabView *self,
  *
  * TBD
  *
- * Returns: TBD
- *
  * Since: 1.2
  */
-gboolean
+void
 hdy_tab_view_close_pages_before (HdyTabView *self,
                                  HdyTabPage *page)
 {
-  GSList *pages = NULL;
   gint pos, i;
 
-  g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
-  g_return_val_if_fail (HDY_IS_TAB_PAGE (page), FALSE);
+  g_return_if_fail (HDY_IS_TAB_VIEW (self));
+  g_return_if_fail (HDY_IS_TAB_PAGE (page));
 
   pos = hdy_tab_view_get_page_position (self, page);
 
   for (i = pos - 1; i >= self->n_pinned_pages; i--) {
     HdyTabPage *p = hdy_tab_view_get_nth_page (self, i);
 
-    pages = g_slist_prepend (pages, p);
+    hdy_tab_view_close_page (self, p);
   }
-
-  return hdy_tab_view_close_pages (self, pages);
 }
 
 /**
@@ -2365,19 +2330,16 @@ hdy_tab_view_close_pages_before (HdyTabView *self,
  *
  * TBD
  *
- * Returns: TBD
- *
  * Since: 1.2
  */
-gboolean
+void
 hdy_tab_view_close_pages_after (HdyTabView *self,
                                 HdyTabPage *page)
 {
-  GSList *pages = NULL;
   gint pos, i;
 
-  g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
-  g_return_val_if_fail (HDY_IS_TAB_PAGE (page), FALSE);
+  g_return_if_fail (HDY_IS_TAB_VIEW (self));
+  g_return_if_fail (HDY_IS_TAB_PAGE (page));
 
   pos = hdy_tab_view_get_page_position (self, page);
 
@@ -2387,10 +2349,8 @@ hdy_tab_view_close_pages_after (HdyTabView *self,
   for (i = self->n_pages - 1; i > pos; i--) {
     HdyTabPage *p = hdy_tab_view_get_nth_page (self, i);
 
-    pages = g_slist_prepend (pages, p);
+    hdy_tab_view_close_page (self, p);
   }
-
-  return hdy_tab_view_close_pages (self, pages);
 }
 
 /**

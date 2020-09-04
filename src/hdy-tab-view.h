@@ -164,20 +164,18 @@ HdyTabPage *hdy_tab_view_append_pinned  (HdyTabView *self,
                                          GtkWidget  *content);
 
 HDY_AVAILABLE_IN_ALL
-gboolean hdy_tab_view_close_page         (HdyTabView *self,
-                                          HdyTabPage *page);
+gboolean hdy_tab_view_close_page (HdyTabView *self,
+                                  HdyTabPage *page);
+
 HDY_AVAILABLE_IN_ALL
-gboolean hdy_tab_view_close_pages        (HdyTabView *self,
-                                          GSList     *pages);
+void hdy_tab_view_close_other_pages  (HdyTabView *self,
+                                      HdyTabPage *page);
 HDY_AVAILABLE_IN_ALL
-gboolean hdy_tab_view_close_other_pages  (HdyTabView *self,
-                                          HdyTabPage *page);
+void hdy_tab_view_close_pages_before (HdyTabView *self,
+                                      HdyTabPage *page);
 HDY_AVAILABLE_IN_ALL
-gboolean hdy_tab_view_close_pages_before (HdyTabView *self,
-                                          HdyTabPage *page);
-HDY_AVAILABLE_IN_ALL
-gboolean hdy_tab_view_close_pages_after  (HdyTabView *self,
-                                          HdyTabPage *page);
+void hdy_tab_view_close_pages_after  (HdyTabView *self,
+                                      HdyTabPage *page);
 
 HDY_AVAILABLE_IN_ALL
 gboolean hdy_tab_view_reorder_page     (HdyTabView *self,
