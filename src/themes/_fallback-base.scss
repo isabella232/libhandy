@@ -144,3 +144,9 @@ viewswitchertitle viewswitcher {
   margin-left: 12px;
   margin-right: 12px;
 }
+
+tabbar .tab-secondary-icon:not(.clickable) {
+  background: none;
+  box-shadow: none;
+  border-color: transparent;
+}

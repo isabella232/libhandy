@@ -61,6 +61,12 @@ void   hdy_tab_page_set_secondary_icon (HdyTabPage *self,
                                         GIcon      *secondary_icon);
 
 HDY_AVAILABLE_IN_ALL
+gboolean hdy_tab_page_get_secondary_icon_activatable (HdyTabPage *self);
+HDY_AVAILABLE_IN_ALL
+void     hdy_tab_page_set_secondary_icon_activatable (HdyTabPage *self,
+                                                      gboolean    activatable);
+
+HDY_AVAILABLE_IN_ALL
 gboolean hdy_tab_page_get_needs_attention (HdyTabPage *self);
 HDY_AVAILABLE_IN_ALL
 void     hdy_tab_page_set_needs_attention (HdyTabPage *self,
@@ -75,9 +81,9 @@ HDY_AVAILABLE_IN_ALL
 HdyTabView *hdy_tab_view_new (void);
 
 HDY_AVAILABLE_IN_ALL
-guint hdy_tab_view_get_n_pages (HdyTabView *self);
+gint hdy_tab_view_get_n_pages (HdyTabView *self);
 HDY_AVAILABLE_IN_ALL
-guint hdy_tab_view_get_n_pinned_pages (HdyTabView *self);
+gint hdy_tab_view_get_n_pinned_pages (HdyTabView *self);
 
 HDY_AVAILABLE_IN_ALL
 gboolean hdy_tab_view_get_is_dragging (HdyTabView *self);
@@ -129,16 +135,16 @@ HdyTabPage *hdy_tab_view_get_page (HdyTabView *self,
 
 HDY_AVAILABLE_IN_ALL
 HdyTabPage *hdy_tab_view_get_nth_page (HdyTabView *self,
-                                       guint       position);
+                                       gint        position);
 
 HDY_AVAILABLE_IN_ALL
-guint hdy_tab_view_get_page_position (HdyTabView *self,
-                                      HdyTabPage *page);
+gint hdy_tab_view_get_page_position (HdyTabView *self,
+                                     HdyTabPage *page);
 
 HDY_AVAILABLE_IN_ALL
 HdyTabPage *hdy_tab_view_insert  (HdyTabView *self,
                                   GtkWidget  *content,
-                                  guint       position);
+                                  gint        position);
 HDY_AVAILABLE_IN_ALL
 HdyTabPage *hdy_tab_view_prepend (HdyTabView *self,
                                   GtkWidget  *content);
@@ -149,7 +155,7 @@ HdyTabPage *hdy_tab_view_append  (HdyTabView *self,
 HDY_AVAILABLE_IN_ALL
 HdyTabPage *hdy_tab_view_insert_pinned  (HdyTabView *self,
                                          GtkWidget  *content,
-                                         guint       position);
+                                         gint        position);
 HDY_AVAILABLE_IN_ALL
 HdyTabPage *hdy_tab_view_prepend_pinned (HdyTabView *self,
                                          GtkWidget  *content);
@@ -176,7 +182,7 @@ gboolean hdy_tab_view_close_pages_after  (HdyTabView *self,
 HDY_AVAILABLE_IN_ALL
 gboolean hdy_tab_view_reorder_page     (HdyTabView *self,
                                         HdyTabPage *page,
-                                        guint       position);
+                                        gint        position);
 HDY_AVAILABLE_IN_ALL
 gboolean hdy_tab_view_reorder_backward (HdyTabView *self,
                                         HdyTabPage *page);
@@ -194,7 +200,7 @@ HDY_AVAILABLE_IN_ALL
 void hdy_tab_view_transfer_page (HdyTabView *self,
                                  HdyTabPage *page,
                                  HdyTabView *other_view,
-                                 guint       position);
+                                 gint        position);
 
 HDY_AVAILABLE_IN_ALL
 GListModel *hdy_tab_view_get_pages (HdyTabView *self);

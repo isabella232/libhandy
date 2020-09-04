@@ -19,3 +19,17 @@ window.csd.unified:not(.solid-csd) {
     -GtkWidget-window-dragging: true;
   }
 }
+
+tabbar .tab-secondary-icon {
+  padding: 0;
+  margin: 0;
+  min-width: 20px;
+  min-height: 20px;
+  border-radius: 99px;
+
+  &:not(.clickable) {
+    background: none;
+    box-shadow: none;
+    border-color: transparent;
+  }
+}

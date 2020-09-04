@@ -121,7 +121,7 @@ struct _HdyTabBox
 
   gint reorder_x;
   gint reorder_y;
-  guint reorder_index;
+  gint reorder_index;
   gint reorder_window_x;
   gboolean continue_reorder;
   gboolean indirect_reordering;
@@ -138,7 +138,7 @@ struct _HdyTabBox
   gint64 drag_autoscroll_prev_time;
 
   HdyTabPage *detached_page;
-  guint detached_index;
+  gint detached_index;
   TabInfo *reorder_placeholder;
   HdyTabPage *placeholder_page;
   gboolean can_remove_placeholder;
@@ -1048,7 +1048,7 @@ animate_reorder_offset (HdyTabBox *self,
 static void
 reset_reorder_animations (HdyTabBox *self)
 {
-  guint i, original_index;
+  gint i, original_index;
   GList *l;
 
   if (!hdy_get_enable_animations (GTK_WIDGET (self)))
@@ -1073,10 +1073,10 @@ reset_reorder_animations (HdyTabBox *self)
 static void
 reorder_page (HdyTabBox  *self,
               HdyTabPage *page,
-              guint       index)
+              gint        index)
 {
   GList *link;
-  guint original_index;
+  gint original_index;
   TabInfo *info, *dest_tab;
   gboolean is_rtl;
 
@@ -1125,7 +1125,7 @@ reorder_page (HdyTabBox  *self,
 
   if (hdy_get_enable_animations (GTK_WIDGET (self)) &&
       gtk_widget_get_mapped (GTK_WIDGET (self))) {
-    guint i;
+    gint i;
 
     if (self->reorder_index > original_index)
       for (i = 0; i < self->reorder_index - original_index; i++) {
@@ -1156,7 +1156,7 @@ update_dragging (HdyTabBox *self)
 {
   gboolean is_rtl, after_selected, found_index;
   gint x;
-  guint i = 0;
+  gint i = 0;
   GList *l;
 
   if (!self->dragging)
@@ -1328,7 +1328,7 @@ end_dragging (HdyTabBox *self)
   dest_tab = g_list_nth_data (self->tabs, self->reorder_index);
 
   if (!self->indirect_reordering) {
-    guint index;
+    gint index;
 
     gdk_seat_ungrab (self->drag_seat);
     self->drag_seat = NULL;
@@ -1431,7 +1431,7 @@ create_tab_info (HdyTabBox  *self,
 static void
 add_page (HdyTabBox  *self,
           HdyTabPage *page,
-          guint       position)
+          gint        position)
 {
   TabInfo *info;
   GList *l;
@@ -3290,7 +3290,7 @@ hdy_tab_box_set_block_scrolling (HdyTabBox *self,
 void
 hdy_tab_box_add_page (HdyTabBox  *self,
                       HdyTabPage *page,
-                      guint       position)
+                      gint        position)
 {
   add_page (self, page, position);
 }

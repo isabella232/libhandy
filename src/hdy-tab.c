@@ -15,13 +15,15 @@ struct _HdyTab
   GtkContainer parent_instance;
 
   GtkLabel *title;
-  GtkImage *icon;
-  GtkImage *pinned_icon;
   GtkStack *stack;
   GtkStack *icon_stack;
-  GtkStack *pinned_icon_stack;
+  GtkImage *icon;
   GtkImage *secondary_icon;
+  GtkButton *secondary_icon_btn;
+  GtkStack *pinned_icon_stack;
+  GtkImage *pinned_icon;
   GtkImage *pinned_secondary_icon;
+  GtkButton *pinned_secondary_icon_btn;
 
   GtkWidget *child;
   GdkWindow *window;
@@ -55,6 +57,19 @@ enum {
 };
 
 static GParamSpec *props[LAST_PROP];
+
+static inline void
+set_style_class (GtkWidget   *widget,
+                 const gchar *style_class,
+                 gboolean     enabled)
+{
+  GtkStyleContext *context = gtk_widget_get_style_context (widget);
+
+  if (enabled)
+    gtk_style_context_add_class (context, style_class);
+  else
+    gtk_style_context_remove_class (context, style_class);
+}
 
 static void
 update_state (HdyTab *self)
@@ -100,7 +115,7 @@ update_icon (HdyTab *self)
   gtk_stack_set_visible_child_name (self->icon_stack, name);
 
   gtk_image_set_from_gicon (self->secondary_icon, secondary_gicon, GTK_ICON_SIZE_BUTTON);
-  gtk_widget_set_visible (GTK_WIDGET (self->secondary_icon), secondary_gicon != NULL);
+  gtk_widget_set_visible (GTK_WIDGET (self->secondary_icon_btn), secondary_gicon != NULL);
 
   if (gicon)
     gtk_image_set_from_gicon (self->pinned_icon, gicon, GTK_ICON_SIZE_BUTTON);
@@ -112,6 +127,16 @@ update_icon (HdyTab *self)
 
   gtk_image_set_from_gicon (self->pinned_secondary_icon, secondary_gicon, GTK_ICON_SIZE_BUTTON);
   gtk_stack_set_visible_child_name (self->pinned_icon_stack, pinned_name);
+}
+
+static void
+update_secondary_icon (HdyTab *self)
+{
+  gboolean activatable = self->page && hdy_tab_page_get_secondary_icon_activatable (self->page);
+  gboolean clickable = activatable && (self->selected || !self->pinned);
+
+  set_style_class (GTK_WIDGET (self->secondary_icon_btn), "clickable", clickable);
+  set_style_class (GTK_WIDGET (self->pinned_secondary_icon_btn), "clickable", clickable);
 }
 
 static void
@@ -155,6 +180,26 @@ close_clicked_cb (HdyTab *self)
    * whole tab mid-click. Instead, defer it until the click has happened.
    */
   g_idle_add ((GSourceFunc) close_idle_cb, self);
+}
+
+static void
+secondary_icon_clicked_cb (HdyTab *self)
+{
+  gboolean clickable;
+
+  if (!self->page)
+    return;
+
+  clickable = hdy_tab_page_get_secondary_icon_activatable (self->page) &&
+              (self->selected || !self->pinned);
+
+  if (!clickable) {
+    hdy_tab_view_set_selected_page (self->view, self->page);
+
+    return;
+  }
+
+  g_signal_emit_by_name (self->view, "secondary-icon-activated", self->page);
 }
 
 static void
@@ -484,6 +529,7 @@ hdy_tab_set_property (GObject      *object,
 
   case PROP_PINNED:
     self->pinned = g_value_get_boolean (value);
+    update_secondary_icon (self);
     break;
 
   case PROP_DRAGGING:
@@ -596,14 +642,17 @@ hdy_tab_class_init (HdyTabClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/sm/puri/handy/ui/hdy-tab.ui");
   gtk_widget_class_bind_template_child (widget_class, HdyTab, title);
-  gtk_widget_class_bind_template_child (widget_class, HdyTab, icon);
-  gtk_widget_class_bind_template_child (widget_class, HdyTab, pinned_icon);
   gtk_widget_class_bind_template_child (widget_class, HdyTab, stack);
   gtk_widget_class_bind_template_child (widget_class, HdyTab, icon_stack);
-  gtk_widget_class_bind_template_child (widget_class, HdyTab, pinned_icon_stack);
+  gtk_widget_class_bind_template_child (widget_class, HdyTab, icon);
   gtk_widget_class_bind_template_child (widget_class, HdyTab, secondary_icon);
+  gtk_widget_class_bind_template_child (widget_class, HdyTab, secondary_icon_btn);
+  gtk_widget_class_bind_template_child (widget_class, HdyTab, pinned_icon_stack);
+  gtk_widget_class_bind_template_child (widget_class, HdyTab, pinned_icon);
   gtk_widget_class_bind_template_child (widget_class, HdyTab, pinned_secondary_icon);
+  gtk_widget_class_bind_template_child (widget_class, HdyTab, pinned_secondary_icon_btn);
   gtk_widget_class_bind_template_callback (widget_class, close_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, secondary_icon_clicked_cb);
 
   gtk_widget_class_set_css_name (widget_class, "tab");
 }
@@ -638,6 +687,7 @@ hdy_tab_set_page (HdyTab     *self,
   if (self->page) {
     g_signal_handlers_disconnect_by_func (self->page, update_tooltip, self);
     g_signal_handlers_disconnect_by_func (self->page, update_icon, self);
+    g_signal_handlers_disconnect_by_func (self->page, update_secondary_icon, self);
     g_signal_handlers_disconnect_by_func (self->page, update_needs_attention, self);
     g_signal_handlers_disconnect_by_func (self->page, update_loading, self);
     g_clear_pointer (&self->selected_binding, g_binding_unbind);
@@ -650,6 +700,7 @@ hdy_tab_set_page (HdyTab     *self,
     update_state (self);
     update_tooltip (self);
     update_icon (self);
+    update_secondary_icon (self);
     update_needs_attention (self);
     update_loading (self);
 
@@ -665,12 +716,15 @@ hdy_tab_set_page (HdyTab     *self,
     g_signal_connect_object (self->page, "notify::secondary-icon",
                              G_CALLBACK (update_icon), self,
                              G_CONNECT_SWAPPED);
+    g_signal_connect_object (self->page, "notify::secondary-icon-activatable",
+                             G_CALLBACK (update_secondary_icon), self,
+                             G_CONNECT_SWAPPED);
     g_signal_connect_object (self->page, "notify::needs-attention",
                              G_CALLBACK (update_needs_attention), self,
                              G_CONNECT_SWAPPED);
     g_signal_connect_object (self->page, "notify::loading",
                              G_CALLBACK (update_loading), self,
-                           G_CONNECT_SWAPPED);
+                             G_CONNECT_SWAPPED);
 
     if (!self->dragging)
       self->selected_binding = g_object_bind_property (self->page, "selected",
@@ -760,6 +814,7 @@ hdy_tab_set_selected (HdyTab   *self,
   self->selected = selected;
 
   update_state (self);
+  update_secondary_icon (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SELECTED]);
 }

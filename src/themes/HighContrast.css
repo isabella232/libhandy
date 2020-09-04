@@ -73,12 +73,18 @@ avatar.contrasted { color: #fff; }
 
 viewswitchertitle viewswitcher { margin-left: 12px; margin-right: 12px; }
 
+tabbar .tab-secondary-icon:not(.clickable) { background: none; box-shadow: none; border-color: transparent; }
+
 /*************************** Check and Radio buttons * */
 popover.combo list { min-width: 200px; }
 
 window.csd.unified:not(.solid-csd) headerbar { border-radius: 0; }
 
 .windowhandle, .windowhandle * { -GtkWidget-window-dragging: true; }
+
+tabbar .tab-secondary-icon { padding: 0; margin: 0; min-width: 20px; min-height: 20px; border-radius: 99px; }
+
+tabbar .tab-secondary-icon:not(.clickable) { background: none; box-shadow: none; border-color: transparent; }
 
 popover.combo { padding: 0px; }
 
@@ -239,6 +245,8 @@ tabbar tab:backdrop:checked { background-color: #fdfdfc; }
 tabbar tab.needs-attention { background-image: radial-gradient(ellipse at bottom, rgba(255, 255, 255, 0.8), rgba(27, 106, 203, 0.2) 15%, rgba(27, 106, 203, 0) 15%); }
 
 tabbar tab .tab-contents { padding: 6px; }
+
+tabbar tab .tab-secondary-icon { padding: 0; min-width: 20px; min-height: 20px; border-radius: 10px; }
 
 tabbar tab .tab-close-button { margin: 0; padding: 0; border-radius: 9999px; }
 

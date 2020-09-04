@@ -67,7 +67,7 @@ static GParamSpec *props[LAST_PROP];
 static void
 update_autohide_cb (HdyTabBar *self)
 {
-  guint n_tabs = 0, n_pinned_tabs = 0;
+  gint n_tabs = 0, n_pinned_tabs = 0;
   gboolean is_dragging;
 
   if (!self->view) {

@@ -17,7 +17,7 @@ static const GtkTargetEntry dst_targets [] = {
  * SECTION:hdy-tab-view
  * @short_description: TBD
  * @title: HdyTabView
- * @See_also: #HdyTabBar
+ * @See_also: #HdyTabBar, #HdyTabViewGroup
  *
  * TBD
  *
@@ -36,6 +36,7 @@ struct _HdyTabPage
   GIcon *icon;
   gboolean loading;
   GIcon *secondary_icon;
+  gboolean secondary_icon_activatable;
   gboolean needs_attention;
 };
 
@@ -51,6 +52,7 @@ enum {
   PAGE_PROP_ICON,
   PAGE_PROP_LOADING,
   PAGE_PROP_SECONDARY_ICON,
+  PAGE_PROP_SECONDARY_ICON_ACTIVATABLE,
   PAGE_PROP_NEEDS_ATTENTION,
   LAST_PAGE_PROP
 };
@@ -64,8 +66,8 @@ struct _HdyTabView
   GtkStack *stack;
   GListStore *pages;
 
-  guint n_pages;
-  guint n_pinned_pages;
+  gint n_pages;
+  gint n_pinned_pages;
   HdyTabPage *selected_page;
   GIcon *default_icon;
   GMenuModel *menu_model;
@@ -98,6 +100,7 @@ enum {
   SIGNAL_PAGE_UNPINNED,
   SIGNAL_SETUP_MENU,
   SIGNAL_CREATE_WINDOW,
+  SIGNAL_SECONDARY_ICON_ACTIVATED,
   SIGNAL_SELECT_PAGE,
   SIGNAL_REORDER_PAGE,
   SIGNAL_LAST_SIGNAL,
@@ -201,6 +204,10 @@ hdy_tab_page_get_property (GObject    *object,
     g_value_set_object (value, hdy_tab_page_get_secondary_icon (self));
     break;
 
+  case PAGE_PROP_SECONDARY_ICON_ACTIVATABLE:
+    g_value_set_boolean (value, hdy_tab_page_get_secondary_icon_activatable (self));
+    break;
+
   case PAGE_PROP_NEEDS_ATTENTION:
     g_value_set_boolean (value, hdy_tab_page_get_needs_attention (self));
     break;
@@ -241,6 +248,10 @@ hdy_tab_page_set_property (GObject      *object,
 
   case PAGE_PROP_SECONDARY_ICON:
     hdy_tab_page_set_secondary_icon (self, g_value_get_object (value));
+    break;
+
+  case PAGE_PROP_SECONDARY_ICON_ACTIVATABLE:
+    hdy_tab_page_set_secondary_icon_activatable (self, g_value_get_boolean (value));
     break;
 
   case PAGE_PROP_NEEDS_ATTENTION:
@@ -375,6 +386,20 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
+   * HdyTabPage:secondary-icon-activatable:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
+  page_props[PAGE_PROP_SECONDARY_ICON_ACTIVATABLE] =
+    g_param_spec_boolean ("secondary-icon-activatable",
+                         _("Secondary Icon Activatable"),
+                         _("Secondary Icon Activatable"),
+                         FALSE,
+                         G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
+
+  /**
    * HdyTabPage:needs-attention:
    *
    * TBD
@@ -423,7 +448,7 @@ set_is_dragging (HdyTabView *self,
 
 static void
 set_n_pages (HdyTabView *self,
-             guint       n_pages)
+             gint        n_pages)
 {
   if (n_pages == self->n_pages)
     return;
@@ -435,7 +460,7 @@ set_n_pages (HdyTabView *self,
 
 static void
 set_n_pinned_pages (HdyTabView *self,
-                    guint       n_pinned_pages)
+                    gint        n_pinned_pages)
 {
   if (n_pinned_pages == self->n_pinned_pages)
     return;
@@ -464,7 +489,7 @@ check_close_window (HdyTabView *self)
 static void
 attach_page (HdyTabView *self,
              HdyTabPage *page,
-             guint       position)
+             gint        position)
 {
   gboolean pinned = hdy_tab_page_get_pinned (page);
   GtkWidget *content = hdy_tab_page_get_content (page);
@@ -490,7 +515,7 @@ static void
 detach_page (HdyTabView *self,
              HdyTabPage *page)
 {
-  guint pos = hdy_tab_view_get_page_position (self, page);
+  gint pos = hdy_tab_view_get_page_position (self, page);
 
   if (page == self->selected_page)
     if (!hdy_tab_view_select_next_page (self))
@@ -513,7 +538,7 @@ detach_page (HdyTabView *self,
 static HdyTabPage *
 insert_page (HdyTabView *self,
              GtkWidget  *content,
-             guint       position,
+             gint        position,
              gboolean    pinned)
 {
   HdyTabPage *page;
@@ -716,11 +741,11 @@ hdy_tab_view_get_property (GObject    *object,
 
   switch (prop_id) {
   case PROP_N_PAGES:
-    g_value_set_uint (value, hdy_tab_view_get_n_pages (self));
+    g_value_set_int (value, hdy_tab_view_get_n_pages (self));
     break;
 
   case PROP_N_PINNED_PAGES:
-    g_value_set_uint (value, hdy_tab_view_get_n_pinned_pages (self));
+    g_value_set_int (value, hdy_tab_view_get_n_pinned_pages (self));
     break;
 
   case PROP_IS_DRAGGING:
@@ -794,11 +819,11 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    * Since: 1.2
    */
   props[PROP_N_PAGES] =
-    g_param_spec_uint ("n-pages",
-                       _("Number of Pages"),
-                       _("Number of Pages"),
-                       0, G_MAXUINT, 0,
-                       G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
+    g_param_spec_int ("n-pages",
+                      _("Number of Pages"),
+                      _("Number of Pages"),
+                      0, G_MAXINT, 0,
+                      G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabView:n-pinned-pages:
@@ -808,11 +833,11 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    * Since: 1.2
    */
   props[PROP_N_PINNED_PAGES] =
-    g_param_spec_uint ("n-pinned-pages",
-                       _("Number of Pinned Pages"),
-                       _("Number of Pinned Pages"),
-                       0, G_MAXUINT, 0,
-                       G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
+    g_param_spec_int ("n-pinned-pages",
+                      _("Number of Pinned Pages"),
+                      _("Number of Pinned Pages"),
+                      0, G_MAXINT, 0,
+                      G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabView:is-dragging:
@@ -904,7 +929,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                   NULL, NULL, NULL,
                   G_TYPE_NONE,
                   2,
-                  HDY_TYPE_TAB_PAGE, G_TYPE_UINT);
+                  HDY_TYPE_TAB_PAGE, G_TYPE_INT);
 
   /**
    * HdyTabView::page-removed:
@@ -943,7 +968,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                   NULL, NULL, NULL,
                   G_TYPE_NONE,
                   2,
-                  HDY_TYPE_TAB_PAGE, G_TYPE_UINT);
+                  HDY_TYPE_TAB_PAGE, G_TYPE_INT);
 
   /**
    * HdyTabView::page-pinned:
@@ -1021,6 +1046,25 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                   NULL, NULL,
                   HDY_TYPE_TAB_VIEW,
                   0);
+
+  /**
+   * HdyTabView::secondary-icon-activated:
+   * @self: a #HdyTabView
+   * @page: TBD
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
+  signals[SIGNAL_SECONDARY_ICON_ACTIVATED] =
+    g_signal_new ("secondary-icon-activated",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE,
+                  1,
+                  HDY_TYPE_TAB_PAGE);
 
   signals[SIGNAL_SELECT_PAGE] =
     g_signal_new ("select-page",
@@ -1362,6 +1406,49 @@ hdy_tab_page_set_secondary_icon (HdyTabPage *self,
 }
 
 /**
+ * hdy_tab_page_get_secondary_icon_activatable:
+ * @self: a #HdyTabPage
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
+gboolean
+hdy_tab_page_get_secondary_icon_activatable (HdyTabPage *self)
+{
+  g_return_val_if_fail (HDY_IS_TAB_PAGE (self), FALSE);
+
+  return self->secondary_icon_activatable;
+}
+
+/**
+ * hdy_tab_page_set_secondary_icon_activatable:
+ * @self: a #HdyTabPage
+ * @activatable: TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
+void
+hdy_tab_page_set_secondary_icon_activatable (HdyTabPage *self,
+                                             gboolean    activatable)
+{
+  g_return_if_fail (HDY_IS_TAB_PAGE (self));
+
+  activatable = !!activatable;
+
+  if (self->secondary_icon_activatable == activatable)
+    return;
+
+  self->secondary_icon_activatable = activatable;
+
+  g_object_notify_by_pspec (G_OBJECT (self), page_props[PAGE_PROP_SECONDARY_ICON_ACTIVATABLE]);
+}
+
+/**
  * hdy_tab_page_get_needs_attention:
  * @self: a #HdyTabPage
  *
@@ -1429,7 +1516,7 @@ hdy_tab_view_new (void)
  *
  * Since: 1.2
  */
-guint
+gint
 hdy_tab_view_get_n_pages (HdyTabView *self)
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), 0);
@@ -1447,7 +1534,7 @@ hdy_tab_view_get_n_pages (HdyTabView *self)
  *
  * Since: 1.2
  */
-guint
+gint
 hdy_tab_view_get_n_pinned_pages (HdyTabView *self)
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), 0);
@@ -1565,7 +1652,7 @@ gboolean
 hdy_tab_view_select_previous_page (HdyTabView *self)
 {
   HdyTabPage *page;
-  guint pos;
+  gint pos;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
 
@@ -1598,7 +1685,7 @@ gboolean
 hdy_tab_view_select_next_page (HdyTabView *self)
 {
   HdyTabPage *page;
-  guint pos;
+  gint pos;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
 
@@ -1631,7 +1718,7 @@ gboolean
 hdy_tab_view_select_first_page (HdyTabView *self)
 {
   HdyTabPage *page;
-  guint pos;
+  gint pos;
   gboolean pinned;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
@@ -1670,7 +1757,7 @@ gboolean
 hdy_tab_view_select_last_page (HdyTabView *self)
 {
   HdyTabPage *page;
-  guint pos;
+  gint pos;
   gboolean pinned;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
@@ -1884,7 +1971,7 @@ hdy_tab_view_set_page_pinned (HdyTabView *self,
                               HdyTabPage *page,
                               gboolean    pinned)
 {
-  guint pos;
+  gint pos;
 
   g_return_if_fail (HDY_IS_TAB_VIEW (self));
   g_return_if_fail (HDY_IS_TAB_PAGE (page));
@@ -1901,7 +1988,7 @@ hdy_tab_view_set_page_pinned (HdyTabView *self,
   pos = self->n_pinned_pages;
 
   if (!pinned)
-      pos--;
+    pos--;
 
   g_list_store_insert (self->pages, pos, page);
 
@@ -1938,13 +2025,13 @@ HdyTabPage *
 hdy_tab_view_get_page (HdyTabView *self,
                        GtkWidget  *content)
 {
-  guint i;
+  gint i;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
 
   for (i = 0; i < self->n_pages; i++) {
-    HdyTabPage *page = g_list_model_get_item (G_LIST_MODEL (self->pages), i);
+    HdyTabPage *page = g_list_model_get_item (G_LIST_MODEL (self->pages), (guint) i);
 
     if (hdy_tab_page_get_content (page) == content)
       return page;
@@ -1966,12 +2053,13 @@ hdy_tab_view_get_page (HdyTabView *self,
  */
 HdyTabPage *
 hdy_tab_view_get_nth_page (HdyTabView *self,
-                           guint       position)
+                           gint        position)
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
-  g_return_val_if_fail (position <= self->n_pages, NULL);
+  g_return_val_if_fail (position >= 0, NULL);
+  g_return_val_if_fail (position < self->n_pages, NULL);
 
-  return g_list_model_get_item (G_LIST_MODEL (self->pages), position);
+  return g_list_model_get_item (G_LIST_MODEL (self->pages), (guint) position);
 }
 
 /**
@@ -1985,14 +2073,14 @@ hdy_tab_view_get_nth_page (HdyTabView *self,
  *
  * Since: 1.2
  */
-guint
+gint
 hdy_tab_view_get_page_position (HdyTabView *self,
                                 HdyTabPage *page)
 {
-  guint i;
+  gint i;
 
-  g_return_val_if_fail (HDY_IS_TAB_VIEW (self), 0);
-  g_return_val_if_fail (HDY_IS_TAB_PAGE (page), 0);
+  g_return_val_if_fail (HDY_IS_TAB_VIEW (self), -1);
+  g_return_val_if_fail (HDY_IS_TAB_PAGE (page), -1);
 
   for (i = 0; i < self->n_pages; i++) {
     HdyTabPage *p = hdy_tab_view_get_nth_page (self, i);
@@ -2001,7 +2089,7 @@ hdy_tab_view_get_page_position (HdyTabView *self,
       return i;
   }
 
-  return 0;
+  return -1;
 }
 
 /**
@@ -2019,10 +2107,11 @@ hdy_tab_view_get_page_position (HdyTabView *self,
 HdyTabPage *
 hdy_tab_view_insert (HdyTabView *self,
                      GtkWidget  *content,
-                     guint       position)
+                     gint        position)
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
+  g_return_val_if_fail (position >= 0, NULL);
   g_return_val_if_fail (position <= self->n_pages, NULL);
 
   return insert_page (self, content, position, FALSE);
@@ -2085,10 +2174,11 @@ hdy_tab_view_append (HdyTabView *self,
 HdyTabPage *
 hdy_tab_view_insert_pinned (HdyTabView *self,
                             GtkWidget  *content,
-                            guint       position)
+                            gint        position)
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
   g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
+  g_return_val_if_fail (position >= 0, NULL);
   g_return_val_if_fail (position <= self->n_pages, NULL);
 
   return insert_page (self, content, position, TRUE);
@@ -2168,7 +2258,7 @@ hdy_tab_view_close_page (HdyTabView *self,
 /**
  * hdy_tab_view_close_pages:
  * @self: a #HdyTabView
- * @pages: (element-type HdyTabPage) (transfer full): TBD
+ * @pages: (element-type HdyTabPage) (transfer container): TBD
  *
  * TBD
  *
@@ -2226,12 +2316,12 @@ hdy_tab_view_close_other_pages (HdyTabView *self,
                                 HdyTabPage *page)
 {
   GSList *pages = NULL;
-  guint i;
+  gint i;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
   g_return_val_if_fail (HDY_IS_TAB_PAGE (page), FALSE);
 
-  for (i = self->n_pinned_pages; i < self->n_pages; i++) {
+  for (i = self->n_pages - 1; i >= self->n_pinned_pages; i--) {
     HdyTabPage *p = hdy_tab_view_get_nth_page (self, i);
 
     if (p == page)
@@ -2239,8 +2329,6 @@ hdy_tab_view_close_other_pages (HdyTabView *self,
 
     pages = g_slist_prepend (pages, p);
   }
-
-  pages = g_slist_reverse (pages);
 
   return hdy_tab_view_close_pages (self, pages);
 }
@@ -2261,20 +2349,18 @@ hdy_tab_view_close_pages_before (HdyTabView *self,
                                  HdyTabPage *page)
 {
   GSList *pages = NULL;
-  guint pos, i;
+  gint pos, i;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
   g_return_val_if_fail (HDY_IS_TAB_PAGE (page), FALSE);
 
   pos = hdy_tab_view_get_page_position (self, page);
 
-  for (i = self->n_pinned_pages; i < pos; i++) {
+  for (i = pos - 1; i >= self->n_pinned_pages; i--) {
     HdyTabPage *p = hdy_tab_view_get_nth_page (self, i);
 
     pages = g_slist_prepend (pages, p);
   }
-
-  pages = g_slist_reverse (pages);
 
   return hdy_tab_view_close_pages (self, pages);
 }
@@ -2295,7 +2381,7 @@ hdy_tab_view_close_pages_after (HdyTabView *self,
                                 HdyTabPage *page)
 {
   GSList *pages = NULL;
-  guint pos, i;
+  gint pos, i;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
   g_return_val_if_fail (HDY_IS_TAB_PAGE (page), FALSE);
@@ -2329,12 +2415,13 @@ hdy_tab_view_close_pages_after (HdyTabView *self,
 gboolean
 hdy_tab_view_reorder_page (HdyTabView *self,
                            HdyTabPage *page,
-                           guint       position)
+                           gint        position)
 {
-  guint original_pos, pinned;
+  gint original_pos, pinned;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
   g_return_val_if_fail (HDY_IS_TAB_PAGE (page), FALSE);
+  g_return_val_if_fail (position >= 0, FALSE);
 
   pinned = hdy_tab_page_get_pinned (page);
 
@@ -2376,7 +2463,7 @@ hdy_tab_view_reorder_backward (HdyTabView *self,
                                HdyTabPage *page)
 {
   gboolean pinned;
-  guint pos, first;
+  gint pos, first;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
   g_return_val_if_fail (HDY_IS_TAB_PAGE (page), FALSE);
@@ -2408,7 +2495,7 @@ hdy_tab_view_reorder_forward (HdyTabView *self,
                               HdyTabPage *page)
 {
   gboolean pinned;
-  guint pos, last;
+  gint pos, last;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
   g_return_val_if_fail (HDY_IS_TAB_PAGE (page), FALSE);
@@ -2440,7 +2527,7 @@ hdy_tab_view_reorder_first (HdyTabView *self,
                             HdyTabPage *page)
 {
   gboolean pinned;
-  guint pos;
+  gint pos;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
   g_return_val_if_fail (HDY_IS_TAB_PAGE (page), FALSE);
@@ -2467,7 +2554,7 @@ hdy_tab_view_reorder_last (HdyTabView *self,
                            HdyTabPage *page)
 {
   gboolean pinned;
-  guint pos;
+  gint pos;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
   g_return_val_if_fail (HDY_IS_TAB_PAGE (page), FALSE);
@@ -2491,10 +2578,11 @@ hdy_tab_view_detach_page (HdyTabView *self,
 void
 hdy_tab_view_attach_page (HdyTabView *self,
                           HdyTabPage *page,
-                          guint       position)
+                          gint        position)
 {
   g_return_if_fail (HDY_IS_TAB_VIEW (self));
   g_return_if_fail (HDY_IS_TAB_PAGE (page));
+  g_return_if_fail (position >= 0);
   g_return_if_fail (position <= self->n_pages);
 
   attach_page (self, page, position);
@@ -2517,11 +2605,12 @@ void
 hdy_tab_view_transfer_page (HdyTabView *self,
                             HdyTabPage *page,
                             HdyTabView *other_view,
-                            guint       position)
+                            gint        position)
 {
   g_return_if_fail (HDY_IS_TAB_VIEW (self));
   g_return_if_fail (HDY_IS_TAB_PAGE (page));
   g_return_if_fail (HDY_IS_TAB_VIEW (other_view));
+  g_return_if_fail (position >= 0);
   g_return_if_fail (position <= other_view->n_pages);
 
   hdy_tab_view_detach_page (self, page);

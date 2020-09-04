@@ -82,13 +82,22 @@
               </packing>
             </child>
             <child>
-              <object class="GtkImage" id="secondary_icon">
+              <object class="GtkButton" id="secondary_icon_btn">
                 <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="valign">center</property>
                 <property name="margin-start">6</property>
                 <property name="margin-end">6</property>
+                <signal name="clicked" handler="secondary_icon_clicked_cb" swapped="true"/>
                 <style>
+                  <class name="flat"/>
                   <class name="tab-secondary-icon"/>
                 </style>
+                <child>
+                  <object class="GtkImage" id="secondary_icon">
+                    <property name="visible">True</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="pack-type">end</property>
@@ -119,17 +128,27 @@
               <object class="GtkSpinner">
                 <property name="visible">True</property>
                 <property name="active">True</property>
+                <property name="halign">center</property>
               </object>
               <packing>
                 <property name="name">spinner</property>
               </packing>
             </child>
             <child>
-              <object class="GtkImage" id="pinned_secondary_icon">
+              <object class="GtkButton" id="pinned_secondary_icon_btn">
                 <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="valign">center</property>
+                <signal name="clicked" handler="secondary_icon_clicked_cb" swapped="true"/>
                 <style>
+                  <class name="flat"/>
                   <class name="tab-secondary-icon"/>
                 </style>
+                <child>
+                  <object class="GtkImage" id="pinned_secondary_icon">
+                    <property name="visible">True</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="name">secondary-icon</property>

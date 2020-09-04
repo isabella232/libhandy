@@ -496,6 +496,13 @@ tabbar {
       padding: 6px;
     }
 
+    .tab-secondary-icon {
+      padding: 0;
+      min-width: 20px;
+      min-height: 20px;
+      border-radius: 10px;
+    }
+
     .tab-close-button {
       margin: 0;
       padding: 0;

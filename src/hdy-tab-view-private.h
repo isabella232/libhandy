@@ -21,6 +21,6 @@ void hdy_tab_view_detach_page   (HdyTabView *self,
                                  HdyTabPage *page);
 void hdy_tab_view_attach_page   (HdyTabView *self,
                                  HdyTabPage *page,
-                                 guint       position);
+                                 gint        position);
 
 G_END_DECLS
