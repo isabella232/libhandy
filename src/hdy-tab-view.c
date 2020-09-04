@@ -528,7 +528,7 @@ detach_page (HdyTabView *self,
   gtk_container_remove (GTK_CONTAINER (self->stack),
                         hdy_tab_page_get_content (page));
 
-  g_signal_emit (self, signals[SIGNAL_PAGE_REMOVED], 0, page);
+  g_signal_emit (self, signals[SIGNAL_PAGE_REMOVED], 0, page, pos);
 
   check_close_window (self);
 }
@@ -929,6 +929,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    * HdyTabView::page-removed:
    * @self: a #HdyTabView
    * @page: TBD
+   * @position: TBD
    *
    * TBD
    *
@@ -941,8 +942,8 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                   0,
                   NULL, NULL, NULL,
                   G_TYPE_NONE,
-                  1,
-                  HDY_TYPE_TAB_PAGE);
+                  2,
+                  HDY_TYPE_TAB_PAGE, G_TYPE_INT);
 
   /**
    * HdyTabView::page-reordered:

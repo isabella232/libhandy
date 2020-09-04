@@ -1988,6 +1988,18 @@ resize_drag_icon (HdyTabBox *self,
 /* Context menu */
 
 static void
+touch_menu_visible_cb (HdyTabBox *self)
+{
+  if (!self->touch_menu || gtk_widget_get_visible (GTK_WIDGET (self->touch_menu)))
+    return;
+
+  gtk_widget_destroy (GTK_WIDGET (self->touch_menu));
+  self->touch_menu = NULL;
+
+  g_signal_emit_by_name (self->view, "setup-menu", NULL);
+}
+
+static void
 do_touch_popup (HdyTabBox *self,
                 TabInfo   *info)
 {
@@ -1997,11 +2009,15 @@ do_touch_popup (HdyTabBox *self,
     return;
 
   // FIXME
-  g_signal_emit_by_name (self->view, "setup-menu", info->page, NULL);
+  g_signal_emit_by_name (self->view, "setup-menu", info->page);
 
-  if (!self->touch_menu)
+  if (!self->touch_menu) {
     self->touch_menu = GTK_POPOVER (gtk_popover_new_from_model (GTK_WIDGET (info->tab), model));
-  else
+
+    g_signal_connect_object (self->touch_menu, "notify::visible",
+                             G_CALLBACK (touch_menu_visible_cb), self,
+                             G_CONNECT_SWAPPED);
+  } else
     gtk_popover_set_relative_to (self->touch_menu, GTK_WIDGET (info->tab));
 
   gtk_popover_popup (self->touch_menu);
@@ -2030,6 +2046,8 @@ popup_menu_deactivate_cb (HdyTabBox *self)
 {
   self->hovering = FALSE;
   update_hover (self);
+
+  g_signal_emit_by_name (self->view, "setup-menu", NULL);
 }
 
 static void
@@ -2043,7 +2061,7 @@ do_popup (HdyTabBox *self,
     return;
 
   // FIXME
-  g_signal_emit_by_name (self->view, "setup-menu", info->page, NULL);
+  g_signal_emit_by_name (self->view, "setup-menu", info->page);
 
   if (!self->context_menu) {
     self->context_menu = GTK_MENU (gtk_menu_new_from_model (model));
