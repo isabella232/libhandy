@@ -1548,6 +1548,9 @@ remove_page (HdyTabBox  *self,
 
   info->page = NULL;
 
+  if (info->appear_animation)
+    hdy_animation_stop (info->appear_animation);
+
   info->appear_animation =
     hdy_animation_new (GTK_WIDGET (self), info->appear_progress, 0,
                        CLOSE_ANIMATION_DURATION,
@@ -1711,6 +1714,8 @@ remove_animation_done_cb (gpointer user_data)
   TabInfo *info = user_data;
   GtkWidget *parent = gtk_widget_get_parent (GTK_WIDGET (info->tab));
   HdyTabBox *self = HDY_TAB_BOX (parent);
+
+  g_clear_object (&info->appear_animation);
 
   if (!self->can_remove_placeholder) {
     hdy_tab_set_page (info->tab, self->placeholder_page);
