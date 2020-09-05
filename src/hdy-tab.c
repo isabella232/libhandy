@@ -213,17 +213,12 @@ hdy_tab_measure (GtkWidget      *widget,
 {
   HdyTab *self = HDY_TAB (widget);
 
-  if (!self->child) {
+  if (!self->child || orientation == GTK_ORIENTATION_HORIZONTAL) {
     if (minimum)
       *minimum = 0;
 
     if (natural)
       *natural = 0;
-  } else if (orientation == GTK_ORIENTATION_HORIZONTAL) {
-    if (minimum)
-      *minimum = 0;
-
-    gtk_widget_get_preferred_width (self->child, NULL, natural);
   } else {
     gtk_widget_get_preferred_height (self->child, minimum, natural);
     hdy_css_measure (widget, orientation, minimum, natural);
