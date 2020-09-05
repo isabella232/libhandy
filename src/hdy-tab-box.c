@@ -1511,18 +1511,21 @@ remove_page (HdyTabBox  *self,
     return;
 
   info = page_link->data;
+  page_link = page_link->next;
 
   force_end_reordering (self);
 
   if (self->hovering) {
     gboolean is_last = TRUE;
-    GList *l;
 
-    for (l = page_link; l; l = l->next) {
-      TabInfo *i = l->data;
+    while (page_link) {
+      TabInfo *i = page_link->data;
+      page_link = page_link->next;
 
-      if (l != page_link && i->page)
+      if (i->page) {
         is_last = FALSE;
+        break;
+      }
     }
 
     if (is_last && self->tab_resize_mode != TAB_RESIZE_NORMAL)
