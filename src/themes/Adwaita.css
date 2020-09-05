@@ -82,7 +82,7 @@ window.csd.unified:not(.solid-csd) headerbar { border-radius: 0; }
 
 .windowhandle, .windowhandle * { -GtkWidget-window-dragging: true; }
 
-tabbar .tab-secondary-icon { padding: 0; margin: 0; min-width: 20px; min-height: 20px; border-radius: 99px; }
+tabbar .tab-close-button, tabbar .tab-secondary-icon { padding: 0; margin: 0; min-width: 24px; min-height: 24px; }
 
 tabbar .tab-secondary-icon:not(.clickable) { background: none; box-shadow: none; border-color: transparent; }
 
@@ -246,11 +246,9 @@ tabbar tab.needs-attention { background-image: radial-gradient(ellipse at bottom
 
 tabbar tab .tab-contents { padding: 6px; }
 
-tabbar tab .tab-secondary-icon { padding: 0; min-width: 20px; min-height: 20px; border-radius: 10px; }
+tabbar tab .tab-close-button, tabbar tab .tab-secondary-icon { border-radius: 99px; }
 
-tabbar tab .tab-close-button { margin: 0; padding: 0; border-radius: 9999px; }
-
-tabbar tab .tab-close-button:not(:hover) { border-color: transparent; }
+tabbar tab .tab-close-button:not(:hover), tabbar tab .tab-secondary-icon:not(:hover) { border-color: transparent; }
 
 tabbar .start-action, tabbar .end-action { background: #cdc7c2; border-color: #bfb8b1; border-style: solid; transition: background 150ms ease-in-out; }
 

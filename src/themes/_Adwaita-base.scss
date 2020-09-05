@@ -496,17 +496,9 @@ tabbar {
       padding: 6px;
     }
 
+    .tab-close-button,
     .tab-secondary-icon {
-      padding: 0;
-      min-width: 20px;
-      min-height: 20px;
-      border-radius: 10px;
-    }
-
-    .tab-close-button {
-      margin: 0;
-      padding: 0;
-      border-radius: 9999px;
+      border-radius: 99px;
 
       &:not(:hover) {
         border-color: transparent;

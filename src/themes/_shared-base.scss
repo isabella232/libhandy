@@ -20,14 +20,16 @@ window.csd.unified:not(.solid-csd) {
   }
 }
 
-tabbar .tab-secondary-icon {
-  padding: 0;
-  margin: 0;
-  min-width: 20px;
-  min-height: 20px;
-  border-radius: 99px;
+tabbar {
+  .tab-close-button,
+  .tab-secondary-icon {
+    padding: 0;
+    margin: 0;
+    min-width: 24px;
+    min-height: 24px;
+  }
 
-  &:not(.clickable) {
+  .tab-secondary-icon:not(.clickable) {
     background: none;
     box-shadow: none;
     border-color: transparent;
