@@ -67,8 +67,6 @@
                 <signal name="clicked" handler="close_clicked_cb" swapped="true"/>
                 <style>
                   <class name="tab-close-button"/>
-                  <class name="image-button"/>
-                  <class name="flat"/>
                 </style>
                 <child>
                   <object class="GtkImage">
@@ -88,7 +86,6 @@
                 <property name="valign">center</property>
                 <signal name="clicked" handler="secondary_icon_clicked_cb" swapped="true"/>
                 <style>
-                  <class name="flat"/>
                   <class name="tab-secondary-icon"/>
                 </style>
                 <child>
@@ -139,7 +136,6 @@
                 <property name="valign">center</property>
                 <signal name="clicked" handler="secondary_icon_clicked_cb" swapped="true"/>
                 <style>
-                  <class name="flat"/>
                   <class name="tab-secondary-icon"/>
                 </style>
                 <child>

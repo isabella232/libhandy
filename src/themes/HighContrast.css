@@ -82,10 +82,6 @@ window.csd.unified:not(.solid-csd) headerbar { border-radius: 0; }
 
 .windowhandle, .windowhandle * { -GtkWidget-window-dragging: true; }
 
-tabbar .tab-close-button, tabbar .tab-secondary-icon { padding: 0; margin: 0; min-width: 24px; min-height: 24px; }
-
-tabbar .tab-secondary-icon:not(.clickable) { background: none; box-shadow: none; border-color: transparent; }
-
 popover.combo { padding: 0px; }
 
 popover.combo list { border-style: none; background-color: transparent; }
@@ -242,14 +238,6 @@ tabbar tab:backdrop { border-color: #d5d0cc; background-color: #efedec; }
 
 tabbar tab:backdrop:checked { background-color: #fdfdfc; }
 
-tabbar tab.needs-attention { background-image: radial-gradient(ellipse at bottom, rgba(255, 255, 255, 0.8), rgba(27, 106, 203, 0.2) 15%, rgba(27, 106, 203, 0) 15%); }
-
-tabbar tab .tab-contents { padding: 6px; }
-
-tabbar tab .tab-close-button, tabbar tab .tab-secondary-icon { border-radius: 99px; }
-
-tabbar tab .tab-close-button:not(:hover), tabbar tab .tab-secondary-icon:not(:hover) { border-color: transparent; }
-
 tabbar .start-action, tabbar .end-action { background: #d4cfca; border-color: #6e645a; border-style: solid; transition: background 150ms ease-in-out; }
 
 tabbar .start-action:backdrop, tabbar .end-action:backdrop { border-color: #d5d0cc; background-color: #efedec; }
@@ -264,6 +252,14 @@ tabbar .start-action:dir(rtl), tabbar .end-action:dir(ltr) { border-left-width: 
 
 tabbar .start-action:dir(rtl) > *, tabbar .end-action:dir(ltr) > * { margin-left: 1px; }
 
-.tab-drag-icon tab { min-height: 38px; background-color: #edebe9; box-shadow: 0 3px 9px 1px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.23); margin: 25px; }
+.tab-drag-icon tab { min-height: 38px; background-color: #edebe9; box-shadow: 0 3px 9px 1px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.23), inset 0 1px rgba(255, 255, 255, 0.8); margin: 25px; }
 
-.tab-drag-icon tab.needs-attention { background-image: radial-gradient(ellipse at bottom, rgba(255, 255, 255, 0.8), rgba(27, 106, 203, 0.2) 15%, rgba(27, 106, 203, 0) 15%); }
+tabbar tab .tab-contents, .tab-drag-icon tab .tab-contents { padding: 6px; }
+
+tabbar tab.needs-attention, .tab-drag-icon tab.needs-attention { background-image: radial-gradient(ellipse at bottom, rgba(255, 255, 255, 0.8), rgba(27, 106, 203, 0.2) 15%, rgba(27, 106, 203, 0) 15%); }
+
+tabbar tab .tab-close-button, tabbar tab .tab-secondary-icon, .tab-drag-icon tab .tab-close-button, .tab-drag-icon tab .tab-secondary-icon { padding: 0; margin: 0; min-width: 24px; min-height: 24px; border-radius: 99px; border: none; box-shadow: none; -gtk-icon-shadow: none; text-shadow: none; background: none; }
+
+tabbar tab .tab-close-button:hover, tabbar tab .tab-secondary-icon.clickable:hover, .tab-drag-icon tab .tab-close-button:hover, .tab-drag-icon tab .tab-secondary-icon.clickable:hover { background: alpha(#272c2e, 0.15); }
+
+tabbar tab .tab-close-button:active, tabbar tab .tab-secondary-icon.clickable:active, .tab-drag-icon tab .tab-close-button:active, .tab-drag-icon tab .tab-secondary-icon.clickable:active { background: alpha(black, 0.2); }

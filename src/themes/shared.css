@@ -4,7 +4,3 @@ popover.combo list { min-width: 200px; }
 window.csd.unified:not(.solid-csd) headerbar { border-radius: 0; }
 
 .windowhandle, .windowhandle * { -GtkWidget-window-dragging: true; }
-
-tabbar .tab-close-button, tabbar .tab-secondary-icon { padding: 0; margin: 0; min-width: 24px; min-height: 24px; }
-
-tabbar .tab-secondary-icon:not(.clickable) { background: none; box-shadow: none; border-color: transparent; }
