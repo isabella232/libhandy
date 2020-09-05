@@ -9,6 +9,9 @@
 
 #include "hdy-tab-view-private.h"
 
+// FIXME replace with groups
+static GSList *tab_view_list;
+
 static const GtkTargetEntry dst_targets [] = {
   { "HDY_TAB", GTK_TARGET_SAME_APP, 0 },
 };
@@ -142,20 +145,11 @@ set_page_pinned (HdyTabPage *self,
 }
 
 static void
-hdy_tab_page_dispose (GObject *object)
-{
-  HdyTabPage *self = HDY_TAB_PAGE (object);
-
-  g_clear_object (&self->content);
-
-  G_OBJECT_CLASS (hdy_tab_page_parent_class)->dispose (object);
-}
-
-static void
 hdy_tab_page_finalize (GObject *object)
 {
   HdyTabPage *self = (HdyTabPage *)object;
 
+  g_clear_object (&self->content);
   g_clear_pointer (&self->title, g_free);
   g_clear_pointer (&self->tooltip, g_free);
   g_clear_object (&self->icon);
@@ -174,7 +168,7 @@ hdy_tab_page_get_property (GObject    *object,
 
   switch (prop_id) {
   case PAGE_PROP_CONTENT:
-    g_value_set_object (value, hdy_tab_page_get_content (self));
+    g_set_object (&self->content, hdy_tab_page_get_content (self));
     break;
 
   case PAGE_PROP_SELECTED:
@@ -269,7 +263,6 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->dispose = hdy_tab_page_dispose;
   object_class->finalize = hdy_tab_page_finalize;
   object_class->get_property = hdy_tab_page_get_property;
   object_class->set_property = hdy_tab_page_set_property;
@@ -514,10 +507,13 @@ detach_page (HdyTabView *self,
              HdyTabPage *page)
 {
   gint pos = hdy_tab_view_get_page_position (self, page);
+  GtkWidget *content;
 
   if (page == self->selected_page)
     if (!hdy_tab_view_select_next_page (self))
       hdy_tab_view_select_previous_page (self);
+
+  g_object_ref (page);
 
   g_list_store_remove (self->pages, pos);
   set_n_pages (self, self->n_pages - 1);
@@ -525,12 +521,18 @@ detach_page (HdyTabView *self,
   if (hdy_tab_page_get_pinned (page))
     set_n_pinned_pages (self, self->n_pinned_pages - 1);
 
-  gtk_container_remove (GTK_CONTAINER (self->stack),
-                        hdy_tab_page_get_content (page));
+  content = hdy_tab_page_get_content (page);
+
+  g_object_ref (content);
+
+  gtk_container_remove (GTK_CONTAINER (self->stack), content);
 
   g_signal_emit (self, signals[SIGNAL_PAGE_REMOVED], 0, page, pos);
 
   check_close_window (self);
+
+  g_object_unref (content);
+  g_object_unref (page);
 }
 
 static HdyTabPage *
@@ -548,6 +550,8 @@ insert_page (HdyTabView *self,
   if (!self->selected_page)
     hdy_tab_view_set_selected_page (self, page);
 
+  g_object_unref (page);
+
   return page;
 }
 
@@ -563,15 +567,6 @@ set_group_from_view (HdyTabView *self,
     slist = NULL;
 
   hdy_tab_view_set_group (self, slist);
-}
-
-static void
-close_page (HdyTabView *self,
-            HdyTabPage *page)
-{
-  detach_page (self, page);
-
-  g_object_unref (page);
 }
 
 static void
@@ -702,10 +697,7 @@ hdy_tab_view_dispose (GObject *object)
     while (self->n_pages) {
       HdyTabPage *page = hdy_tab_view_get_nth_page (self, 0);
 
-      close_page (self, page);
-
-      // FIXME why is this needed
-      g_object_unref (page);
+      detach_page (self, page);
     }
 
     g_clear_object (&self->pages);
@@ -721,6 +713,8 @@ hdy_tab_view_finalize (GObject *object)
 
   g_clear_object (&self->default_icon);
   g_clear_object (&self->menu_model);
+
+  tab_view_list = g_slist_remove (tab_view_list, self);
 
   G_OBJECT_CLASS (hdy_tab_view_parent_class)->finalize (object);
 }
@@ -1147,6 +1141,8 @@ hdy_tab_view_init (HdyTabView *self)
 
   g_signal_connect_object (self, "select-page", G_CALLBACK (select_page_cb), self, 0);
   g_signal_connect_object (self, "reorder-page", G_CALLBACK (reorder_page_cb), self, 0);
+
+  tab_view_list = g_slist_prepend (tab_view_list, self);
 }
 
 /**
@@ -1582,7 +1578,7 @@ hdy_tab_view_start_drag (HdyTabView *self)
 
   g_return_if_fail (HDY_IS_TAB_VIEW (self));
 
-  for (l = self->group; l; l = l->next) {
+  for (l = tab_view_list; l; l = l->next) {
     HdyTabView *view = l->data;
 
     set_is_dragging (view, TRUE);
@@ -1596,7 +1592,7 @@ hdy_tab_view_end_drag (HdyTabView *self)
 
   g_return_if_fail (HDY_IS_TAB_VIEW (self));
 
-  for (l = self->group; l; l = l->next) {
+  for (l = tab_view_list; l; l = l->next) {
     HdyTabView *view = l->data;
 
     set_is_dragging (view, FALSE);
@@ -1896,7 +1892,7 @@ hdy_tab_view_get_group (HdyTabView *self)
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
 
-  return self->group;
+  return tab_view_list; //self->group;
 }
 
 /**
@@ -2046,7 +2042,7 @@ hdy_tab_view_get_page (HdyTabView *self,
   g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
 
   for (i = 0; i < self->n_pages; i++) {
-    HdyTabPage *page = g_list_model_get_item (G_LIST_MODEL (self->pages), (guint) i);
+    HdyTabPage *page = hdy_tab_view_get_nth_page (self, i);
 
     if (hdy_tab_page_get_content (page) == content)
       return page;
@@ -2070,11 +2066,15 @@ HdyTabPage *
 hdy_tab_view_get_nth_page (HdyTabView *self,
                            gint        position)
 {
+  g_autoptr (HdyTabPage) page = NULL;
+
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
   g_return_val_if_fail (position >= 0, NULL);
   g_return_val_if_fail (position < self->n_pages, NULL);
 
-  return g_list_model_get_item (G_LIST_MODEL (self->pages), (guint) position);
+  page = g_list_model_get_item (G_LIST_MODEL (self->pages), (guint) position);
+
+  return page;
 }
 
 /**
@@ -2264,7 +2264,7 @@ hdy_tab_view_close_page (HdyTabView *self,
   g_signal_emit (self, signals[SIGNAL_CLOSE_PAGE], 0, page, &prevent_closing);
 
   if (!prevent_closing)
-    close_page (self, page);
+    detach_page (self, page);
 
   return !prevent_closing;
 }
@@ -2526,6 +2526,8 @@ hdy_tab_view_detach_page (HdyTabView *self,
   g_return_if_fail (HDY_IS_TAB_VIEW (self));
   g_return_if_fail (HDY_IS_TAB_PAGE (page));
 
+  g_object_ref (page);
+
   detach_page (self, page);
 }
 
@@ -2542,6 +2544,8 @@ hdy_tab_view_attach_page (HdyTabView *self,
   attach_page (self, page, position);
 
   hdy_tab_view_set_selected_page (self, page);
+
+  g_object_unref (page);
 }
 
 /**
