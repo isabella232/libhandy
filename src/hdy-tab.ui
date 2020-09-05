@@ -86,8 +86,6 @@
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="valign">center</property>
-                <property name="margin-start">6</property>
-                <property name="margin-end">6</property>
                 <signal name="clicked" handler="secondary_icon_clicked_cb" swapped="true"/>
                 <style>
                   <class name="flat"/>
