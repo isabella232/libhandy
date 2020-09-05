@@ -1355,21 +1355,36 @@ end_dragging (HdyTabBox *self)
 /* Selection */
 
 static void
+reset_focus (HdyTabBox *self)
+{
+  GtkWidget *toplevel = gtk_widget_get_toplevel (GTK_WIDGET (self));
+
+  gtk_container_set_focus_child (GTK_CONTAINER (self), NULL);
+
+  if (toplevel && GTK_IS_WINDOW (toplevel))
+    gtk_window_set_focus (GTK_WINDOW (toplevel), NULL);
+}
+
+static void
 select_page (HdyTabBox  *self,
              HdyTabPage *page)
 {
   if (!page) {
     self->selected_tab = NULL;
 
-    gtk_container_set_focus_child (GTK_CONTAINER (self), NULL);
+    reset_focus (self);
 
     return;
   }
 
   self->selected_tab = find_info_for_page (self, page);
 
-  if (!self->selected_tab)
+  if (!self->selected_tab) {
+    if (gtk_container_get_focus_child (GTK_CONTAINER (self)))
+      reset_focus (self);
+
     return;
+  }
 
   if (hdy_tab_bar_tabs_have_visible_focus (self->tab_bar))
     gtk_widget_grab_focus (GTK_WIDGET (self->selected_tab->tab));
