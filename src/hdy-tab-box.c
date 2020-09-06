@@ -3202,6 +3202,18 @@ hdy_tab_box_class_init (HdyTabBoxClass *klass)
                   G_TYPE_NONE,
                   2, GTK_TYPE_DIRECTION_TYPE, G_TYPE_BOOLEAN);
 
+  g_signal_override_class_handler ("activate-tab",
+                                   G_TYPE_FROM_CLASS (klass),
+                                   G_CALLBACK (activate_tab));
+
+  g_signal_override_class_handler ("focus-tab",
+                                   G_TYPE_FROM_CLASS (klass),
+                                   G_CALLBACK (focus_tab_cb));
+
+  g_signal_override_class_handler ("reorder-tab",
+                                   G_TYPE_FROM_CLASS (klass),
+                                   G_CALLBACK (reorder_tab_cb));
+
   binding_set = gtk_binding_set_by_class (klass);
 
   gtk_binding_entry_add_signal (binding_set, GDK_KEY_space,     0, "activate-tab", 0);
@@ -3261,10 +3273,6 @@ hdy_tab_box_init (HdyTabBox *self)
 
   self->source_targets = gtk_target_list_new (src_targets,
                                               G_N_ELEMENTS (src_targets));
-
-  g_signal_connect_object (self, "activate-tab", G_CALLBACK (activate_tab), self, G_CONNECT_AFTER);
-  g_signal_connect_object (self, "focus-tab", G_CALLBACK (focus_tab_cb), self, 0);
-  g_signal_connect_object (self, "reorder-tab", G_CALLBACK (reorder_tab_cb), self, 0);
 }
 
 void

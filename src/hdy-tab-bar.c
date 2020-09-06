@@ -115,9 +115,9 @@ page_pinned_cb (HdyTabBar  *self,
 {
   gboolean should_focus = hdy_tab_box_is_page_focused (self->scroll_box, page);
 
+  hdy_tab_box_remove_page (self->scroll_box, page);
   hdy_tab_box_add_page (self->pinned_box, page,
                         hdy_tab_view_get_n_pinned_pages (self->view));
-  hdy_tab_box_remove_page (self->scroll_box, page);
 
   if (should_focus)
     hdy_tab_box_try_focus_selected_tab (self->pinned_box);
@@ -129,9 +129,9 @@ page_unpinned_cb (HdyTabBar  *self,
 {
   gboolean should_focus = hdy_tab_box_is_page_focused (self->pinned_box, page);
 
+  hdy_tab_box_remove_page (self->pinned_box, page);
   hdy_tab_box_add_page (self->scroll_box, page,
                         hdy_tab_view_get_n_pinned_pages (self->view));
-  hdy_tab_box_remove_page (self->pinned_box, page);
 
   if (should_focus)
     hdy_tab_box_try_focus_selected_tab (self->scroll_box);
