@@ -164,8 +164,12 @@ HdyTabPage *hdy_tab_view_append_pinned  (HdyTabView *self,
                                          GtkWidget  *content);
 
 HDY_AVAILABLE_IN_ALL
-gboolean hdy_tab_view_close_page (HdyTabView *self,
-                                  HdyTabPage *page);
+void hdy_tab_view_close_page        (HdyTabView *self,
+                                     HdyTabPage *page);
+HDY_AVAILABLE_IN_ALL
+void hdy_tab_view_close_page_finish (HdyTabView *self,
+                                     HdyTabPage *page,
+                                     gboolean    confirm);
 
 HDY_AVAILABLE_IN_ALL
 void hdy_tab_view_close_other_pages  (HdyTabView *self,

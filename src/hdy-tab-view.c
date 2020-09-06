@@ -41,6 +41,8 @@ struct _HdyTabPage
   GIcon *secondary_icon;
   gboolean secondary_icon_activatable;
   gboolean needs_attention;
+
+  gboolean closing;
 };
 
 G_DEFINE_TYPE (HdyTabPage, hdy_tab_page, G_TYPE_OBJECT)
@@ -609,6 +611,15 @@ add_reorder_bindings (GtkBindingSet    *binding_set,
                                 G_TYPE_BOOLEAN, last);
 }
 
+static gboolean
+close_page_cb (HdyTabView *self,
+               HdyTabPage *page)
+{
+  hdy_tab_view_close_page_finish (self, page, TRUE);
+
+  return GDK_EVENT_PROPAGATE;
+}
+
 static void
 select_page_cb (HdyTabView       *self,
                 GtkDirectionType  direction,
@@ -1093,6 +1104,18 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                   G_TYPE_NONE, 2,
                   GTK_TYPE_DIRECTION_TYPE, G_TYPE_BOOLEAN);
 
+  g_signal_override_class_handler ("close-page",
+                                   G_TYPE_FROM_CLASS (klass),
+                                   G_CALLBACK (close_page_cb));
+
+  g_signal_override_class_handler ("select-page",
+                                   G_TYPE_FROM_CLASS (klass),
+                                   G_CALLBACK (select_page_cb));
+
+  g_signal_override_class_handler ("reorder-page",
+                                   G_TYPE_FROM_CLASS (klass),
+                                   G_CALLBACK (reorder_page_cb));
+
   binding_set = gtk_binding_set_by_class (klass);
 
   add_select_bindings (binding_set, GDK_KEY_Page_Up,   GTK_DIR_TAB_BACKWARD, FALSE);
@@ -1138,9 +1161,6 @@ hdy_tab_view_init (HdyTabView *self)
                      dst_targets,
                      G_N_ELEMENTS (dst_targets),
                      GDK_ACTION_MOVE);
-
-  g_signal_connect_object (self, "select-page", G_CALLBACK (select_page_cb), self, 0);
-  g_signal_connect_object (self, "reorder-page", G_CALLBACK (reorder_page_cb), self, 0);
 
   tab_view_list = g_slist_prepend (tab_view_list, self);
 }
@@ -2248,25 +2268,47 @@ hdy_tab_view_append_pinned (HdyTabView *self,
  *
  * TBD
  *
- * Returns: TBD
- *
  * Since: 1.2
  */
-gboolean
+void
 hdy_tab_view_close_page (HdyTabView *self,
                          HdyTabPage *page)
 {
-  gboolean prevent_closing;
+  gboolean ret;
 
-  g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
-  g_return_val_if_fail (HDY_IS_TAB_PAGE (page), FALSE);
+  g_return_if_fail (HDY_IS_TAB_VIEW (self));
+  g_return_if_fail (HDY_IS_TAB_PAGE (page));
 
-  g_signal_emit (self, signals[SIGNAL_CLOSE_PAGE], 0, page, &prevent_closing);
+  if (page->closing)
+    return;
 
-  if (!prevent_closing)
+  page->closing = TRUE;
+  g_signal_emit (self, signals[SIGNAL_CLOSE_PAGE], 0, page, &ret);
+}
+
+/**
+ * hdy_tab_view_close_page_finish:
+ * @self: a #HdyTabView
+ * @page: TBD
+ * @confirm: TBD
+ *
+ * TBD
+ *
+ * Since: 1.2
+ */
+void
+hdy_tab_view_close_page_finish (HdyTabView *self,
+                                HdyTabPage *page,
+                                gboolean    confirm)
+{
+  g_return_if_fail (HDY_IS_TAB_VIEW (self));
+  g_return_if_fail (HDY_IS_TAB_PAGE (page));
+  g_return_if_fail (page->closing);
+
+  page->closing = FALSE;
+
+  if (confirm)
     detach_page (self, page);
-
-  return !prevent_closing;
 }
 
 /**
