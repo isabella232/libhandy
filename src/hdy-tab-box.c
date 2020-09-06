@@ -1911,6 +1911,9 @@ create_drag_icon (HdyTabBox      *self,
   icon->window = gtk_window_new (GTK_WINDOW_POPUP);
   icon->context = context;
 
+  gtk_window_set_screen (GTK_WINDOW (icon->window),
+                         gtk_widget_get_screen (GTK_WIDGET (self)));
+
   icon->width = predict_tab_width (self, self->reordered_tab, FALSE);
   icon->target_width = icon->width;
 
@@ -1936,9 +1939,6 @@ create_drag_icon (HdyTabBox      *self,
   gtk_widget_set_size_request (GTK_WIDGET (icon->tab),
                                icon->width + icon->tab_margin.left + icon->tab_margin.right,
                                -1);
-
-  gtk_window_set_screen (GTK_WINDOW (icon->window),
-                         gtk_widget_get_screen (GTK_WIDGET (self)));
 
   icon->hotspot_x = (gint) self->drag_offset_x;
   icon->hotspot_y = (gint) self->drag_offset_y;

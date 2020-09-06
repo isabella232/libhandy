@@ -203,6 +203,16 @@ secondary_icon_clicked_cb (HdyTab *self)
 }
 
 static void
+hdy_tab_destroy (GtkWidget *widget)
+{
+  HdyTab *self = HDY_TAB (widget);
+
+  g_clear_pointer (&self->child, gtk_widget_unparent);
+
+  GTK_WIDGET_CLASS (hdy_tab_parent_class)->destroy (widget);
+}
+
+static void
 hdy_tab_measure (GtkWidget      *widget,
                  GtkOrientation  orientation,
                  gint            for_size,
@@ -570,6 +580,7 @@ hdy_tab_class_init (HdyTabClass *klass)
   object_class->get_property = hdy_tab_get_property;
   object_class->set_property = hdy_tab_set_property;
 
+  widget_class->destroy = hdy_tab_destroy;
   widget_class->get_preferred_width = hdy_tab_get_preferred_width;
   widget_class->get_preferred_height = hdy_tab_get_preferred_height;
   widget_class->get_preferred_width_for_height = hdy_tab_get_preferred_width_for_height;
