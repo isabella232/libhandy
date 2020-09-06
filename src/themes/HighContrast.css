@@ -228,11 +228,9 @@ tabbar tab { min-width: 130px; border-style: solid; border-color: #6e645a; borde
 
 tabbar tab.pinned { min-width: 40px; }
 
-tabbar tab:hover { background-color: #dfdcd8; }
-
 tabbar tab:checked { background-color: #e1dedb; }
 
-tabbar tab:checked:hover { background-color: #edebe9; }
+tabbar tab:hover { background-color: #edebe9; }
 
 tabbar tab:backdrop { border-color: #d5d0cc; background-color: #efedec; }
 
