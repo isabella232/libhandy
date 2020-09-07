@@ -3255,7 +3255,7 @@ hdy_tab_box_init (HdyTabBox *self)
 
   self->touch_menu_gesture = g_object_new (GTK_TYPE_GESTURE_LONG_PRESS,
                                            "widget", GTK_WIDGET (self),
-                                           "propagation-phase", GTK_PHASE_TARGET,
+                                           "propagation-phase", GTK_PHASE_CAPTURE,
                                            "touch-only", TRUE,
                                            NULL);
 
