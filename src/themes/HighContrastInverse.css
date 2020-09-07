@@ -198,6 +198,7 @@ window.csd.unified:not(.solid-csd):not(.fullscreen) > decoration-overlay { box-s
 
 window.csd.unified:not(.solid-csd):not(.fullscreen):not(.tiled):not(.tiled-top):not(.tiled-bottom):not(.tiled-left):not(.tiled-right):not(.maximized), window.csd.unified:not(.solid-csd):not(.fullscreen):not(.tiled):not(.tiled-top):not(.tiled-bottom):not(.tiled-left):not(.tiled-right):not(.maximized) > decoration, window.csd.unified:not(.solid-csd):not(.fullscreen):not(.tiled):not(.tiled-top):not(.tiled-bottom):not(.tiled-left):not(.tiled-right):not(.maximized) > decoration-overlay { border-radius: 8px; }
 
+/* FIXME this should be inlined after we finalize the colors */
 tabbar .box { min-height: 38px; background: #111111; border-color: #4e4e4e; border-style: solid; }
 
 tabbar .box:backdrop { background-color: #202020; border-color: #202020; }
@@ -224,17 +225,39 @@ tabbar.needs-attention-left undershoot.left { background: linear-gradient(to rig
 
 tabbar.needs-attention-right undershoot.right { background: linear-gradient(to left, rgba(15, 59, 113, 0.7), rgba(15, 59, 113, 0.5) 1px, rgba(15, 59, 113, 0) 20px); }
 
-tabbar tab { min-width: 130px; border-style: solid; border-color: #4e4e4e; border-width: 0 1px 0 1px; background-color: #191919; transition: background 150ms ease-in-out; }
+tabbar tab { min-width: 130px; border-style: solid; border-color: #4e4e4e; border-width: 0 1px 0 1px; transition: background 150ms ease-in-out; background-color: #191919; }
+
+tabbar tab .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(25, 25, 25, 0), #191919 18px); }
+
+tabbar tab .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(25, 25, 25, 0), #191919 18px); }
 
 tabbar tab.pinned { min-width: 40px; }
 
 tabbar tab:checked { background-color: #202020; }
 
+tabbar tab:checked .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(32, 32, 32, 0), #202020 18px); }
+
+tabbar tab:checked .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(32, 32, 32, 0), #202020 18px); }
+
 tabbar tab:hover { background-color: #353535; }
+
+tabbar tab:hover .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(53, 53, 53, 0), #353535 18px); }
+
+tabbar tab:hover .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(53, 53, 53, 0), #353535 18px); }
 
 tabbar tab:backdrop { border-color: #202020; background-color: #282828; }
 
+tabbar tab:backdrop .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(40, 40, 40, 0), #282828 18px); }
+
+tabbar tab:backdrop .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(40, 40, 40, 0), #282828 18px); }
+
 tabbar tab:backdrop:checked { background-color: #303030; }
+
+tabbar tab:backdrop:checked .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(48, 48, 48, 0), #303030 18px); }
+
+tabbar tab:backdrop:checked .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(48, 48, 48, 0), #303030 18px); }
+
+tabbar tab:not(:hover):not(:checked) .tab-close-button-scrim { opacity: 0; }
 
 tabbar .start-action, tabbar .end-action { background: #191919; border-color: #4e4e4e; border-style: solid; transition: background 150ms ease-in-out; }
 
@@ -252,6 +275,10 @@ tabbar .start-action:dir(rtl) > *, tabbar .end-action:dir(ltr) > * { margin-left
 
 .tab-drag-icon tab { min-height: 38px; background-color: #353535; box-shadow: 0 3px 9px 1px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(104, 104, 104, 0.9), inset 0 1px rgba(238, 238, 236, 0.07); margin: 25px; }
 
+.tab-drag-icon tab .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(53, 53, 53, 0), #353535 18px); }
+
+.tab-drag-icon tab .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(53, 53, 53, 0), #353535 18px); }
+
 tabbar tab .tab-contents, .tab-drag-icon tab .tab-contents { padding: 6px; }
 
 tabbar tab.needs-attention, .tab-drag-icon tab.needs-attention { background-image: radial-gradient(ellipse at bottom, rgba(255, 255, 255, 0.8), rgba(15, 59, 113, 0.2) 15%, rgba(15, 59, 113, 0) 15%); }
@@ -261,3 +288,9 @@ tabbar tab .tab-close-button, tabbar tab .tab-secondary-icon, .tab-drag-icon tab
 tabbar tab .tab-close-button:hover, tabbar tab .tab-secondary-icon.clickable:hover, .tab-drag-icon tab .tab-close-button:hover, .tab-drag-icon tab .tab-secondary-icon.clickable:hover { background: alpha(#f3f3f1, 0.15); }
 
 tabbar tab .tab-close-button:active, tabbar tab .tab-secondary-icon.clickable:active, .tab-drag-icon tab .tab-close-button:active, .tab-drag-icon tab .tab-secondary-icon.clickable:active { background: alpha(black, 0.2); }
+
+tabbar .tab-close-button-scrim, .tab-drag-icon .tab-close-button-scrim { transition: all 150ms ease-in-out; }
+
+tabbar .tab-close-button-scrim:dir(ltr), .tab-drag-icon .tab-close-button-scrim:dir(ltr) { padding-left: 21px; }
+
+tabbar .tab-close-button-scrim:dir(rtl), .tab-drag-icon .tab-close-button-scrim:dir(rtl) { padding-right: 21px; }

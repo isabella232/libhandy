@@ -11,90 +11,102 @@
           <class name="tab-contents"/>
         </style>
         <child>
-          <object class="GtkBox">
+          <object class="GtkOverlay">
             <property name="visible">True</property>
             <child>
-              <object class="GtkButton" id="secondary_icon_btn">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="valign">center</property>
-                <property name="halign">start</property>
-                <signal name="clicked" handler="secondary_icon_clicked_cb" swapped="true"/>
-                <style>
-                  <class name="tab-secondary-icon"/>
-                </style>
-                <child>
-                  <object class="GtkImage" id="secondary_icon">
-                    <property name="visible">True</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child type="center">
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkStack" id="icon_stack">
+                  <object class="GtkButton" id="secondary_icon_btn">
                     <property name="visible">True</property>
-                    <property name="margin-start">6</property>
-                    <property name="margin-end">6</property>
+                    <property name="can-focus">False</property>
+                    <property name="valign">center</property>
+                    <property name="halign">start</property>
+                    <signal name="clicked" handler="secondary_icon_clicked_cb" swapped="true"/>
+                    <style>
+                      <class name="tab-secondary-icon"/>
+                    </style>
                     <child>
-                      <object class="GtkImage" id="icon">
+                      <object class="GtkImage" id="secondary_icon">
                         <property name="visible">True</property>
-                        <style>
-                          <class name="tab-icon"/>
-                        </style>
                       </object>
-                      <packing>
-                        <property name="name">icon</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSpinner">
-                        <property name="visible">True</property>
-                        <property name="active">True</property>
-                      </object>
-                      <packing>
-                        <property name="name">spinner</property>
-                      </packing>
                     </child>
                   </object>
                 </child>
-                <child>
-                  <object class="GtkLabel" id="title">
+                <child type="center">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="hexpand">True</property>
-                    <property name="halign">center</property>
-                    <property name="xalign">0</property>
-                    <property name="ellipsize">end</property>
-                    <property name="single-line-mode">True</property>
-                    <style>
-                      <class name="tab-title"/>
-                    </style>
+                    <child>
+                      <object class="GtkStack" id="icon_stack">
+                        <property name="visible">True</property>
+                        <property name="margin-start">6</property>
+                        <property name="margin-end">6</property>
+                        <child>
+                          <object class="GtkImage" id="icon">
+                            <property name="visible">True</property>
+                            <style>
+                              <class name="tab-icon"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="name">icon</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinner">
+                            <property name="visible">True</property>
+                            <property name="active">True</property>
+                          </object>
+                          <packing>
+                            <property name="name">spinner</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="title">
+                        <property name="visible">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="halign">center</property>
+                        <property name="xalign">0</property>
+                        <property name="ellipsize">end</property>
+                        <property name="single-line-mode">True</property>
+                        <style>
+                          <class name="tab-title"/>
+                        </style>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
             </child>
-            <child>
-              <object class="GtkButton" id="close_btn">
-                <property name="visible" bind-source="HdyTab" bind-property="selected" bind-flags="sync-create"/>
-                <property name="valign">center</property>
+            <child type="overlay">
+              <object class="GtkBox">
+                <property name="visible">True</property>
                 <property name="halign">end</property>
-                <property name="can-focus">False</property>
-                <property name="margin-start">6</property>
-                <signal name="clicked" handler="close_clicked_cb" swapped="true"/>
                 <style>
-                  <class name="tab-close-button"/>
+                  <class name="tab-close-button-scrim"/>
                 </style>
                 <child>
-                  <object class="GtkImage">
+                  <object class="GtkButton" id="close_btn">
                     <property name="visible">True</property>
-                    <property name="icon-name">window-close-symbolic</property>
+                    <property name="valign">center</property>
+                    <property name="can-focus">False</property>
+                    <signal name="clicked" handler="close_clicked_cb" swapped="true"/>
+                    <style>
+                      <class name="tab-close-button"/>
+                    </style>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="icon-name">window-close-symbolic</property>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
               <packing>
-                <property name="pack-type">end</property>
+                <property name="pass-through">True</property>
               </packing>
             </child>
           </object>

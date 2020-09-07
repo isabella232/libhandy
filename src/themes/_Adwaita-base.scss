@@ -336,6 +336,7 @@ window.csd.unified:not(.solid-csd):not(.fullscreen) {
 }
 
 
+/* FIXME this should be inlined after we finalize the colors */
 
 $tab_selected_bg:           darken(darken($bg_color, 10%), 2%);
 $tab_selected_bg_backdrop:  $bg_color;
@@ -384,6 +385,20 @@ $tab_needs_attention_color: $selected_bg_color;
                               transparentize($tab_needs_attention_color, .3),
                               transparentize($tab_needs_attention_color, .5) 1px,
                               transparentize($tab_needs_attention_color, 1) 20px);
+}
+
+@mixin tab-background($color) {
+  background-color: $color;
+
+  .tab-close-button-scrim {
+     &:dir(ltr) {
+       background: linear-gradient(to right, transparentize($color, 1), $color 18px);
+     }
+
+     &:dir(rtl) {
+       background: linear-gradient(to left, transparentize($color, 1), $color 18px);
+     }
+   }
 }
 
 tabbar {
@@ -454,28 +469,32 @@ tabbar {
     border-style: solid;
     border-color: $alt_borders_color;
     border-width: 0 1px 0 1px;
-    background-color: $tab_bg;
     transition: background 150ms ease-in-out;
+    @include tab-background($tab_bg);
 
     &.pinned {
       min-width: 40px;
     }
 
     &:checked {
-      background-color: $tab_selected_bg;
+      @include tab-background($tab_selected_bg);
     }
 
     &:hover {
-      background-color: $tab_hover_bg;
+      @include tab-background($tab_hover_bg);
     }
 
     &:backdrop {
       border-color: $backdrop_borders_color;
-      background-color: $tab_bg_backdrop;
+      @include tab-background($tab_bg_backdrop);
 
       &:checked {
-        background-color: $tab_selected_bg_backdrop;
+        @include tab-background($tab_selected_bg_backdrop);
       }
+    }
+
+    &:not(:hover):not(:checked) .tab-close-button-scrim {
+      opacity: 0;
     }
   }
 
@@ -519,7 +538,7 @@ tabbar {
 .tab-drag-icon {
   tab {
     min-height: 38px;
-    background-color: $tab_hover_bg;
+    @include tab-background($tab_hover_bg);
 
     $_wm_border: if($variant=='light', transparentize(black, 0.77), transparentize($borders_color, 0.1));
 
@@ -572,4 +591,16 @@ tabbar,
       }
     }
   }
+
+  .tab-close-button-scrim {
+     transition: all 150ms ease-in-out;
+
+     &:dir(ltr) {
+       padding-left: 21px;
+     }
+
+     &:dir(rtl) {
+       padding-right: 21px;
+     }
+ }
 }
