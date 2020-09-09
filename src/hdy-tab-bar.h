@@ -55,4 +55,7 @@ HDY_AVAILABLE_IN_ALL
 void              hdy_tab_bar_set_position (HdyTabBar         *self,
                                             HdyTabBarPosition  position);
 
+HDY_AVAILABLE_IN_ALL
+gboolean hdy_tab_bar_get_tabs_revealed (HdyTabBar *self);
+
 G_END_DECLS

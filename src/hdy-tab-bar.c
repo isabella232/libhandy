@@ -59,10 +59,23 @@ enum {
   PROP_START_ACTION_WIDGET,
   PROP_END_ACTION_WIDGET,
   PROP_POSITION,
+  PROP_TABS_REVEALED,
   LAST_PROP
 };
 
 static GParamSpec *props[LAST_PROP];
+
+static void
+set_tabs_revealed (HdyTabBar *self,
+                   gboolean   tabs_revealed)
+{
+  if (tabs_revealed == hdy_tab_bar_get_tabs_revealed (self))
+    return;
+
+  gtk_revealer_set_reveal_child (self->revealer, tabs_revealed);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_TABS_REVEALED]);
+}
 
 static void
 update_autohide_cb (HdyTabBar *self)
@@ -71,7 +84,7 @@ update_autohide_cb (HdyTabBar *self)
   gboolean is_dragging;
 
   if (!self->view) {
-    gtk_revealer_set_reveal_child (self->revealer, FALSE);
+    set_tabs_revealed (self, FALSE);
 
     return;
   }
@@ -80,10 +93,7 @@ update_autohide_cb (HdyTabBar *self)
   n_pinned_tabs = hdy_tab_view_get_n_pinned_pages (self->view);
   is_dragging = hdy_tab_view_get_is_dragging (self->view);
 
-  gtk_revealer_set_reveal_child (self->revealer,
-                                 n_tabs > 1 ||
-                                 n_pinned_tabs >= 1 ||
-                                 is_dragging);
+  set_tabs_revealed (self, n_tabs > 1 || n_pinned_tabs >= 1 || is_dragging);
 }
 
 static void
@@ -313,6 +323,10 @@ hdy_tab_bar_get_property (GObject    *object,
     g_value_set_enum (value, hdy_tab_bar_get_position (self));
     break;
 
+  case PROP_TABS_REVEALED:
+    g_value_set_boolean (value, hdy_tab_bar_get_tabs_revealed (self));
+    break;
+
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
   }
@@ -421,6 +435,20 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
                        HDY_TYPE_TAB_BAR_POSITION,
                        HDY_TAB_BAR_POSITION_TOP,
                        G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
+
+  /**
+   * HdyTabBar:tabs-revealed:
+   *
+   * TBD
+   *
+   * Since: 1.2
+   */
+  props[PROP_TABS_REVEALED] =
+    g_param_spec_boolean ("tabs-revealed",
+                          _("Tabs Revealed"),
+                          _("Tabs Revealed"),
+                          FALSE,
+                          G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -638,6 +666,8 @@ hdy_tab_bar_set_start_action_widget (HdyTabBar *self,
   if (widget)
     gtk_container_add (GTK_CONTAINER (self->start_action_bin), widget);
 
+  gtk_widget_set_visible (GTK_WIDGET (self->start_action_bin), widget != NULL);
+
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_START_ACTION_WIDGET]);
 }
 
@@ -687,6 +717,8 @@ hdy_tab_bar_set_end_action_widget (HdyTabBar *self,
 
   if (widget)
     gtk_container_add (GTK_CONTAINER (self->end_action_bin), widget);
+
+  gtk_widget_set_visible (GTK_WIDGET (self->end_action_bin), widget != NULL);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_END_ACTION_WIDGET]);
 }
@@ -753,4 +785,22 @@ hdy_tab_bar_set_position (HdyTabBar         *self,
   }
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_POSITION]);
+}
+
+/**
+ * hdy_tab_bar_get_tabs_revealed:
+ * @self: a #HdyTabBar
+ *
+ * TBD
+ *
+ * Returns: TBD
+ *
+ * Since: 1.2
+ */
+gboolean
+hdy_tab_bar_get_tabs_revealed (HdyTabBar *self)
+{
+  g_return_val_if_fail (HDY_IS_TAB_BAR (self), FALSE);
+
+  return gtk_revealer_get_reveal_child (self->revealer);
 }
