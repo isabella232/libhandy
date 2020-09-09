@@ -152,4 +152,4 @@ pages:
     paths:
       - public
   only:
-    - master
+    - tabs
