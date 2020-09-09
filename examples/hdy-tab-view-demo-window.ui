@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.22.0 -->
+<interface>
+  <requires lib="gtk+" version="3.20"/>
+  <requires lib="libhandy" version="0.0"/>
+  <template class="HdyTabViewDemoWindow" parent="HdyApplicationWindow">
+    <property name="title">Tab View Demo</property>
+    <property name="default-width">800</property>
+    <property name="default-height">600</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="HdyHeaderBar">
+            <property name="visible">True</property>
+            <property name="show_close_button">True</property>
+            <property name="title" bind-source="HdyTabViewDemoWindow" bind-property="title"/>
+            <child>
+              <object class="GtkButton">
+                <property name="visible">True</property>
+                <property name="action-name">win.tab-new</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="icon-name">tab-new-symbolic</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuButton">
+                <property name="visible">True</property>
+                <property name="menu-model">primary_menu</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="icon-name">open-menu-symbolic</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="pack-type">end</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="HdyTabBar">
+            <property name="visible">True</property>
+            <property name="view">view</property>
+          </object>
+        </child>
+        <child>
+          <object class="HdyTabView" id="view">
+            <property name="visible">True</property>
+            <property name="vexpand">True</property>
+            <property name="menu-model">tab_menu</property>
+            <signal name="setup-menu" handler="setup_menu_cb" swapped="true"/>
+            <signal name="create-window" handler="create_window_cb" swapped="true"/>
+            <signal name="secondary-icon-activated" handler="secondary_icon_activated_cb" swapped="true"/>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+  <menu id="primary_menu">
+    <section>
+      <item>
+        <attribute name="label">_New Window</attribute>
+        <attribute name="action">win.window-new</attribute>
+      </item>
+    </section>
+  </menu>
+  <menu id="tab_menu">
+    <section>
+      <item>
+        <attribute name="label">_Move to New Window</attribute>
+        <attribute name="action">tab.move-to-new-window</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label">P_in Tab</attribute>
+        <attribute name="action">tab.pin</attribute>
+        <attribute name="hidden-when">action-disabled</attribute>
+      </item>
+      <item>
+        <attribute name="label">Unp_in Tab</attribute>
+        <attribute name="action">tab.unpin</attribute>
+        <attribute name="hidden-when">action-disabled</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label">Loa_ding</attribute>
+        <attribute name="action">tab.loading</attribute>
+      </item>
+      <item>
+        <attribute name="label">Needs _Attention</attribute>
+        <attribute name="action">tab.needs-attention</attribute>
+      </item>
+      <item>
+        <attribute name="label">_Secondary Icon</attribute>
+        <attribute name="action">tab.secondary-icon</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label">Close _Other Tabs</attribute>
+        <attribute name="action">tab.close-other</attribute>
+      </item>
+      <item>
+        <attribute name="label">Close Tabs to the _Left</attribute>
+        <attribute name="action">tab.close-left</attribute>
+      </item>
+      <item>
+        <attribute name="label">Close Tabs to the _Right</attribute>
+        <attribute name="action">tab.close-right</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label">_Close</attribute>
+        <attribute name="action">tab.close</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

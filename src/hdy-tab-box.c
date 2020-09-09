@@ -2629,7 +2629,7 @@ hdy_tab_box_button_press_event (GtkWidget      *widget,
 
   self->pressed_button = event->button;
 
-  if (self->pressed_button == GDK_BUTTON_MIDDLE && !self->pinned) {
+  if (self->pressed_button == GDK_BUTTON_MIDDLE) {
     hdy_tab_view_close_page (self->view, self->hovered_tab->page);
 
     return GDK_EVENT_STOP;

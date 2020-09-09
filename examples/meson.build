@@ -12,6 +12,7 @@ handy_demo_sources = [
   'handy-demo.c',
   'hdy-demo-preferences-window.c',
   'hdy-demo-window.c',
+  'hdy-tab-view-demo-window.c',
   'hdy-view-switcher-demo-window.c',
   libhandy_generated_headers,
 ]

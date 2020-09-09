@@ -1,6 +1,7 @@
 #include "hdy-demo-window.h"
 
 #include <glib/gi18n.h>
+#include "hdy-tab-view-demo-window.h"
 #include "hdy-view-switcher-demo-window.h"
 
 struct _HdyDemoWindow
@@ -426,6 +427,18 @@ avatar_update_contacts (HdyDemoWindow *self)
 }
 
 static void
+tab_view_demo_clicked_cb (GtkButton     *btn,
+                          HdyDemoWindow *self)
+{
+  GtkApplication *app = gtk_window_get_application (GTK_WINDOW (self) );
+  HdyTabViewDemoWindow *window = hdy_tab_view_demo_window_new (app);
+
+  hdy_tab_view_demo_window_prepopulate (window);
+
+  gtk_window_present (GTK_WINDOW (window));
+}
+
+static void
 hdy_demo_window_constructed (GObject *object)
 {
   HdyDemoWindow *self = HDY_DEMO_WINDOW (object);
@@ -487,6 +500,7 @@ hdy_demo_window_class_init (HdyDemoWindowClass *klass)
   gtk_widget_class_bind_template_callback_full (widget_class, "carousel_return_clicked_cb", G_CALLBACK(carousel_return_clicked_cb));
   gtk_widget_class_bind_template_callback_full (widget_class, "avatar_file_remove_cb", G_CALLBACK(avatar_file_remove_cb));
   gtk_widget_class_bind_template_callback_full (widget_class, "avatar_file_set_cb", G_CALLBACK(avatar_file_set_cb));
+  gtk_widget_class_bind_template_callback_full (widget_class, "tab_view_demo_clicked_cb", G_CALLBACK(tab_view_demo_clicked_cb));
 }
 
 static void

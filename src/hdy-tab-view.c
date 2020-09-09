@@ -615,7 +615,8 @@ static gboolean
 close_page_cb (HdyTabView *self,
                HdyTabPage *page)
 {
-  hdy_tab_view_close_page_finish (self, page, TRUE);
+  hdy_tab_view_close_page_finish (self, page,
+                                  !hdy_tab_page_get_pinned (page));
 
   return GDK_EVENT_PROPAGATE;
 }
