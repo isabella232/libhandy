@@ -20,7 +20,7 @@ static const GtkTargetEntry dst_targets [] = {
  * SECTION:hdy-tab-view
  * @short_description: TBD
  * @title: HdyTabView
- * @See_also: #HdyTabBar, #HdyTabViewGroup
+ * @See_also: #HdyTabBar
  *
  * TBD
  *
