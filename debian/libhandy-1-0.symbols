@@ -291,7 +291,7 @@ libhandy-1.so.0 libhandy-1-0 #MINVER#
  hdy_tab_bar_set_position@LIBHANDY_1_0 1.0.0
  hdy_tab_bar_set_start_action_widget@LIBHANDY_1_0 1.0.0
  hdy_tab_bar_set_view@LIBHANDY_1_0 1.0.0
- hdy_tab_page_get_content@LIBHANDY_1_0 1.0.0
+ hdy_tab_page_get_child@LIBHANDY_1_0 1.0.0
  hdy_tab_page_get_icon@LIBHANDY_1_0 1.0.0
  hdy_tab_page_get_loading@LIBHANDY_1_0 1.0.0
  hdy_tab_page_get_needs_attention@LIBHANDY_1_0 1.0.0

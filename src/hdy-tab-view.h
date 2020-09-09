@@ -22,7 +22,7 @@ HDY_AVAILABLE_IN_ALL
 G_DECLARE_FINAL_TYPE (HdyTabPage, hdy_tab_page, HDY, TAB_PAGE, GObject)
 
 HDY_AVAILABLE_IN_ALL
-GtkWidget *hdy_tab_page_get_content (HdyTabPage *self);
+GtkWidget *hdy_tab_page_get_child (HdyTabPage *self);
 
 HDY_AVAILABLE_IN_ALL
 gboolean hdy_tab_page_get_selected (HdyTabPage *self);
@@ -131,7 +131,7 @@ void hdy_tab_view_set_page_pinned (HdyTabView *self,
 
 HDY_AVAILABLE_IN_ALL
 HdyTabPage *hdy_tab_view_get_page (HdyTabView *self,
-                                   GtkWidget  *content);
+                                   GtkWidget  *child);
 
 HDY_AVAILABLE_IN_ALL
 HdyTabPage *hdy_tab_view_get_nth_page (HdyTabView *self,
@@ -143,25 +143,25 @@ gint hdy_tab_view_get_page_position (HdyTabView *self,
 
 HDY_AVAILABLE_IN_ALL
 HdyTabPage *hdy_tab_view_insert  (HdyTabView *self,
-                                  GtkWidget  *content,
+                                  GtkWidget  *child,
                                   gint        position);
 HDY_AVAILABLE_IN_ALL
 HdyTabPage *hdy_tab_view_prepend (HdyTabView *self,
-                                  GtkWidget  *content);
+                                  GtkWidget  *child);
 HDY_AVAILABLE_IN_ALL
 HdyTabPage *hdy_tab_view_append  (HdyTabView *self,
-                                  GtkWidget  *content);
+                                  GtkWidget  *child);
 
 HDY_AVAILABLE_IN_ALL
 HdyTabPage *hdy_tab_view_insert_pinned  (HdyTabView *self,
-                                         GtkWidget  *content,
+                                         GtkWidget  *child,
                                          gint        position);
 HDY_AVAILABLE_IN_ALL
 HdyTabPage *hdy_tab_view_prepend_pinned (HdyTabView *self,
-                                         GtkWidget  *content);
+                                         GtkWidget  *child);
 HDY_AVAILABLE_IN_ALL
 HdyTabPage *hdy_tab_view_append_pinned  (HdyTabView *self,
-                                         GtkWidget  *content);
+                                         GtkWidget  *child);
 
 HDY_AVAILABLE_IN_ALL
 void hdy_tab_view_close_page        (HdyTabView *self,

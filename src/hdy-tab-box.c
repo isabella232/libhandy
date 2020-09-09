@@ -555,15 +555,14 @@ add_reorder_bindings (GtkBindingSet    *binding_set,
 static void
 activate_tab (HdyTabBox *self)
 {
-  GtkWidget *content;
+  GtkWidget *child;
 
   if (!self->selected_tab || !self->selected_tab->page)
     return;
 
-  content = hdy_tab_page_get_content (self->selected_tab->page);
+  child = hdy_tab_page_get_child (self->selected_tab->page);
 
-  // FIXME this does nothing somehow
-  gtk_widget_grab_focus (content);
+  gtk_widget_grab_focus (child);
 }
 
 static void

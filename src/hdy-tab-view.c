@@ -31,7 +31,7 @@ struct _HdyTabPage
 {
   GObject parent_instance;
 
-  GtkWidget *content;
+  GtkWidget *child;
   gboolean selected;
   gboolean pinned;
   gchar *title;
@@ -49,7 +49,7 @@ G_DEFINE_TYPE (HdyTabPage, hdy_tab_page, G_TYPE_OBJECT)
 
 enum {
   PAGE_PROP_0,
-  PAGE_PROP_CONTENT,
+  PAGE_PROP_CHILD,
   PAGE_PROP_SELECTED,
   PAGE_PROP_PINNED,
   PAGE_PROP_TITLE,
@@ -151,7 +151,7 @@ hdy_tab_page_finalize (GObject *object)
 {
   HdyTabPage *self = (HdyTabPage *)object;
 
-  g_clear_object (&self->content);
+  g_clear_object (&self->child);
   g_clear_pointer (&self->title, g_free);
   g_clear_pointer (&self->tooltip, g_free);
   g_clear_object (&self->icon);
@@ -169,8 +169,8 @@ hdy_tab_page_get_property (GObject    *object,
   HdyTabPage *self = HDY_TAB_PAGE (object);
 
   switch (prop_id) {
-  case PAGE_PROP_CONTENT:
-    g_set_object (&self->content, hdy_tab_page_get_content (self));
+  case PAGE_PROP_CHILD:
+    g_set_object (&self->child, hdy_tab_page_get_child (self));
     break;
 
   case PAGE_PROP_SELECTED:
@@ -223,8 +223,8 @@ hdy_tab_page_set_property (GObject      *object,
   HdyTabPage *self = HDY_TAB_PAGE (object);
 
   switch (prop_id) {
-  case PAGE_PROP_CONTENT:
-    g_set_object (&self->content, g_value_get_object (value));
+  case PAGE_PROP_CHILD:
+    g_set_object (&self->child, g_value_get_object (value));
     break;
 
   case PAGE_PROP_TITLE:
@@ -270,44 +270,44 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
   object_class->set_property = hdy_tab_page_set_property;
 
   /**
-   * HdyTabPage:content:
+   * HdyTabPage:child:
    *
-   * TBD
+   * The child for this page.
    *
    * Since: 1.2
    */
-  page_props[PAGE_PROP_CONTENT] =
-    g_param_spec_object ("content",
-                         _("Content"),
-                         _("Content"),
+  page_props[PAGE_PROP_CHILD] =
+    g_param_spec_object ("child",
+                         _("Child"),
+                         _("The child for this page"),
                          GTK_TYPE_WIDGET,
                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
 
   /**
    * HdyTabPage:selected:
    *
-   * TBD
+   * Whether the page is selected.
    *
    * Since: 1.2
    */
   page_props[PAGE_PROP_SELECTED] =
     g_param_spec_boolean ("selected",
                          _("Selected"),
-                         _("Selected"),
+                         _("Whether the page is selected"),
                          FALSE,
                          G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabPage:pinned:
    *
-   * TBD
+   * Whether the page is pinned. See hdy_tab_view_set_page_pinned()
    *
    * Since: 1.2
    */
   page_props[PAGE_PROP_PINNED] =
     g_param_spec_boolean ("pinned",
                          _("Pinned"),
-                         _("Pinned"),
+                         _("Whether the page is pinned"),
                          FALSE,
                          G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
@@ -488,12 +488,12 @@ attach_page (HdyTabView *self,
              gint        position)
 {
   gboolean pinned = hdy_tab_page_get_pinned (page);
-  GtkWidget *content = hdy_tab_page_get_content (page);
+  GtkWidget *child = hdy_tab_page_get_child (page);
 
   g_list_store_insert (self->pages, position, page);
 
-  gtk_container_add (GTK_CONTAINER (self->stack), content);
-  gtk_container_child_set (GTK_CONTAINER (self->stack), content,
+  gtk_container_add (GTK_CONTAINER (self->stack), child);
+  gtk_container_child_set (GTK_CONTAINER (self->stack), child,
                            "position", position,
                            NULL);
 
@@ -509,7 +509,7 @@ detach_page (HdyTabView *self,
              HdyTabPage *page)
 {
   gint pos = hdy_tab_view_get_page_position (self, page);
-  GtkWidget *content;
+  GtkWidget *child;
 
   if (page == self->selected_page)
     if (!hdy_tab_view_select_next_page (self))
@@ -523,27 +523,27 @@ detach_page (HdyTabView *self,
   if (hdy_tab_page_get_pinned (page))
     set_n_pinned_pages (self, self->n_pinned_pages - 1);
 
-  content = hdy_tab_page_get_content (page);
+  child = hdy_tab_page_get_child (page);
 
-  g_object_ref (content);
+  g_object_ref (child);
 
-  gtk_container_remove (GTK_CONTAINER (self->stack), content);
+  gtk_container_remove (GTK_CONTAINER (self->stack), child);
 
   g_signal_emit (self, signals[SIGNAL_PAGE_REMOVED], 0, page, pos);
 
   check_close_window (self);
 
-  g_object_unref (content);
+  g_object_unref (child);
   g_object_unref (page);
 }
 
 static HdyTabPage *
 insert_page (HdyTabView *self,
-             GtkWidget  *content,
+             GtkWidget  *child,
              gint        position,
              gboolean    pinned)
 {
-  HdyTabPage *page = g_object_new (HDY_TYPE_TAB_PAGE, "content", content, NULL);
+  HdyTabPage *page = g_object_new (HDY_TYPE_TAB_PAGE, "child", child, NULL);
 
   set_page_pinned (page, pinned);
 
@@ -650,7 +650,7 @@ select_page_cb (HdyTabView       *self,
       success = hdy_tab_view_select_next_page (self);
   }
 
-  gtk_widget_grab_focus (hdy_tab_page_get_content (self->selected_page));
+  gtk_widget_grab_focus (hdy_tab_page_get_child (self->selected_page));
 
   if (!success)
     gtk_widget_error_bell (GTK_WIDGET (self));
@@ -914,7 +914,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
   /**
    * HdyTabView::page-added:
    * @self: a #HdyTabView
-   * @page: TBD
+   * @page: a page of @self
    * @position: TBD
    *
    * TBD
@@ -934,7 +934,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
   /**
    * HdyTabView::page-removed:
    * @self: a #HdyTabView
-   * @page: TBD
+   * @page: a page of @self
    * @position: TBD
    *
    * TBD
@@ -954,7 +954,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
   /**
    * HdyTabView::page-reordered:
    * @self: a #HdyTabView
-   * @page: TBD
+   * @page: a page of @self
    * @position: TBD
    *
    * TBD
@@ -974,7 +974,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
   /**
    * HdyTabView::page-pinned:
    * @self: a #HdyTabView
-   * @page: TBD
+   * @page: a page of @self
    *
    * TBD
    *
@@ -993,7 +993,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
   /**
    * HdyTabView::page-unpinned:
    * @self: a #HdyTabView
-   * @page: TBD
+   * @page: a page of @self
    *
    * TBD
    *
@@ -1012,7 +1012,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
   /**
    * HdyTabView::close-page:
    * @self: a #HdyTabView
-   * @page: TBD
+   * @page: a page of @self
    *
    * TBD
    *
@@ -1071,7 +1071,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
   /**
    * HdyTabView::secondary-icon-activated:
    * @self: a #HdyTabView
-   * @page: TBD
+   * @page: a page of @self
    *
    * TBD
    *
@@ -1167,7 +1167,7 @@ hdy_tab_view_init (HdyTabView *self)
 }
 
 /**
- * hdy_tab_page_get_content:
+ * hdy_tab_page_get_child:
  * @self: a #HdyTabPage
  *
  * TBD
@@ -1177,11 +1177,11 @@ hdy_tab_view_init (HdyTabView *self)
  * Since: 1.2
  */
 GtkWidget *
-hdy_tab_page_get_content (HdyTabPage *self)
+hdy_tab_page_get_child (HdyTabPage *self)
 {
   g_return_val_if_fail (HDY_IS_TAB_PAGE (self), NULL);
 
-  return self->content;
+  return self->child;
 }
 
 /**
@@ -1662,7 +1662,7 @@ hdy_tab_view_set_selected_page (HdyTabView *self,
 
   self->selected_page = selected_page;
   gtk_stack_set_visible_child (self->stack,
-                               hdy_tab_page_get_content (selected_page));
+                               hdy_tab_page_get_child (selected_page));
 
   if (self->selected_page)
     set_page_selected (self->selected_page, TRUE);
@@ -1991,7 +1991,7 @@ hdy_tab_view_join_group (HdyTabView *self,
 /**
  * hdy_tab_view_set_page_pinned:
  * @self: a #HdyTabView
- * @page: TBD
+ * @page: a page of @self
  * @pinned: TBD
  *
  * TBD
@@ -2030,7 +2030,7 @@ hdy_tab_view_set_page_pinned (HdyTabView *self,
     pos++;
 
   gtk_container_child_set (GTK_CONTAINER (self->stack),
-                           hdy_tab_page_get_content (page),
+                           hdy_tab_page_get_child (page),
                            "position", self->n_pinned_pages,
                            NULL);
 
@@ -2045,7 +2045,7 @@ hdy_tab_view_set_page_pinned (HdyTabView *self,
 /**
  * hdy_tab_view_get_page:
  * @self: a #HdyTabView
- * @content: TBD
+ * @child: TBD
  *
  * TBD
  *
@@ -2055,17 +2055,17 @@ hdy_tab_view_set_page_pinned (HdyTabView *self,
  */
 HdyTabPage *
 hdy_tab_view_get_page (HdyTabView *self,
-                       GtkWidget  *content)
+                       GtkWidget  *child)
 {
   gint i;
 
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
-  g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
+  g_return_val_if_fail (GTK_IS_WIDGET (child), NULL);
 
   for (i = 0; i < self->n_pages; i++) {
     HdyTabPage *page = hdy_tab_view_get_nth_page (self, i);
 
-    if (hdy_tab_page_get_content (page) == content)
+    if (hdy_tab_page_get_child (page) == child)
       return page;
   }
 
@@ -2101,7 +2101,7 @@ hdy_tab_view_get_nth_page (HdyTabView *self,
 /**
  * hdy_tab_view_get_page_position:
  * @self: a #HdyTabView
- * @page: TBD
+ * @page: a page of @self
  *
  * TBD
  *
@@ -2131,7 +2131,7 @@ hdy_tab_view_get_page_position (HdyTabView *self,
 /**
  * hdy_tab_view_insert:
  * @self: a #HdyTabView
- * @content: TBD
+ * @child: TBD
  * @position: TBD
  *
  * TBD
@@ -2142,21 +2142,21 @@ hdy_tab_view_get_page_position (HdyTabView *self,
  */
 HdyTabPage *
 hdy_tab_view_insert (HdyTabView *self,
-                     GtkWidget  *content,
+                     GtkWidget  *child,
                      gint        position)
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
-  g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
+  g_return_val_if_fail (GTK_IS_WIDGET (child), NULL);
   g_return_val_if_fail (position >= self->n_pinned_pages, NULL);
   g_return_val_if_fail (position <= self->n_pages, NULL);
 
-  return insert_page (self, content, position, FALSE);
+  return insert_page (self, child, position, FALSE);
 }
 
 /**
  * hdy_tab_view_prepend:
  * @self: a #HdyTabView
- * @content: TBD
+ * @child: TBD
  *
  * TBD
  *
@@ -2166,18 +2166,18 @@ hdy_tab_view_insert (HdyTabView *self,
  */
 HdyTabPage *
 hdy_tab_view_prepend (HdyTabView *self,
-                      GtkWidget  *content)
+                      GtkWidget  *child)
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
-  g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
+  g_return_val_if_fail (GTK_IS_WIDGET (child), NULL);
 
-  return insert_page (self, content, self->n_pinned_pages, FALSE);
+  return insert_page (self, child, self->n_pinned_pages, FALSE);
 }
 
 /**
  * hdy_tab_view_append:
  * @self: a #HdyTabView
- * @content: TBD
+ * @child: TBD
  *
  * TBD
  *
@@ -2187,18 +2187,18 @@ hdy_tab_view_prepend (HdyTabView *self,
  */
 HdyTabPage *
 hdy_tab_view_append (HdyTabView *self,
-                     GtkWidget  *content)
+                     GtkWidget  *child)
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
-  g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
+  g_return_val_if_fail (GTK_IS_WIDGET (child), NULL);
 
-  return insert_page (self, content, self->n_pages, FALSE);
+  return insert_page (self, child, self->n_pages, FALSE);
 }
 
 /**
  * hdy_tab_view_insert_pinned:
  * @self: a #HdyTabView
- * @content: TBD
+ * @child: TBD
  * @position: TBD
  *
  * TBD
@@ -2209,21 +2209,21 @@ hdy_tab_view_append (HdyTabView *self,
  */
 HdyTabPage *
 hdy_tab_view_insert_pinned (HdyTabView *self,
-                            GtkWidget  *content,
+                            GtkWidget  *child,
                             gint        position)
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
-  g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
+  g_return_val_if_fail (GTK_IS_WIDGET (child), NULL);
   g_return_val_if_fail (position >= 0, NULL);
   g_return_val_if_fail (position <= self->n_pinned_pages, NULL);
 
-  return insert_page (self, content, position, TRUE);
+  return insert_page (self, child, position, TRUE);
 }
 
 /**
  * hdy_tab_view_prepend_pinned:
  * @self: a #HdyTabView
- * @content: TBD
+ * @child: TBD
  *
  * TBD
  *
@@ -2233,18 +2233,18 @@ hdy_tab_view_insert_pinned (HdyTabView *self,
  */
 HdyTabPage *
 hdy_tab_view_prepend_pinned (HdyTabView *self,
-                             GtkWidget  *content)
+                             GtkWidget  *child)
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
-  g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
+  g_return_val_if_fail (GTK_IS_WIDGET (child), NULL);
 
-  return insert_page (self, content, 0, TRUE);
+  return insert_page (self, child, 0, TRUE);
 }
 
 /**
  * hdy_tab_view_append_pinned:
  * @self: a #HdyTabView
- * @content: TBD
+ * @child: TBD
  *
  * TBD
  *
@@ -2254,18 +2254,18 @@ hdy_tab_view_prepend_pinned (HdyTabView *self,
  */
 HdyTabPage *
 hdy_tab_view_append_pinned (HdyTabView *self,
-                            GtkWidget  *content)
+                            GtkWidget  *child)
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
-  g_return_val_if_fail (GTK_IS_WIDGET (content), NULL);
+  g_return_val_if_fail (GTK_IS_WIDGET (child), NULL);
 
-  return insert_page (self, content, self->n_pinned_pages, TRUE);
+  return insert_page (self, child, self->n_pinned_pages, TRUE);
 }
 
 /**
  * hdy_tab_view_close_page:
  * @self: a #HdyTabView
- * @page: TBD
+ * @page: a page of @self
  *
  * TBD
  *
@@ -2290,7 +2290,7 @@ hdy_tab_view_close_page (HdyTabView *self,
 /**
  * hdy_tab_view_close_page_finish:
  * @self: a #HdyTabView
- * @page: TBD
+ * @page: a page of @self
  * @confirm: TBD
  *
  * TBD
@@ -2315,7 +2315,7 @@ hdy_tab_view_close_page_finish (HdyTabView *self,
 /**
  * hdy_tab_view_close_other_pages:
  * @self: a #HdyTabView
- * @page: TBD
+ * @page: a page of @self
  *
  * TBD
  *
@@ -2343,7 +2343,7 @@ hdy_tab_view_close_other_pages (HdyTabView *self,
 /**
  * hdy_tab_view_close_pages_before:
  * @self: a #HdyTabView
- * @page: TBD
+ * @page: a page of @self
  *
  * TBD
  *
@@ -2370,7 +2370,7 @@ hdy_tab_view_close_pages_before (HdyTabView *self,
 /**
  * hdy_tab_view_close_pages_after:
  * @self: a #HdyTabView
- * @page: TBD
+ * @page: a page of @self
  *
  * TBD
  *
@@ -2400,7 +2400,7 @@ hdy_tab_view_close_pages_after (HdyTabView *self,
 /**
  * hdy_tab_view_reorder_page:
  * @self: a #HdyTabView
- * @page: TBD
+ * @page: a page of @self
  * @position: TBD
  *
  * TBD
@@ -2435,7 +2435,7 @@ hdy_tab_view_reorder_page (HdyTabView *self,
   g_list_store_insert (self->pages, position, page);
 
   gtk_container_child_set (GTK_CONTAINER (self->stack),
-                           hdy_tab_page_get_content (page),
+                           hdy_tab_page_get_child (page),
                            "position", position,
                            NULL);
 
@@ -2447,7 +2447,7 @@ hdy_tab_view_reorder_page (HdyTabView *self,
 /**
  * hdy_tab_view_reorder_backward:
  * @self: a #HdyTabView
- * @page: TBD
+ * @page: a page of @self
  *
  * TBD
  *
@@ -2479,7 +2479,7 @@ hdy_tab_view_reorder_backward (HdyTabView *self,
 /**
  * hdy_tab_view_reorder_forward:
  * @self: a #HdyTabView
- * @page: TBD
+ * @page: a page of @self
  *
  * TBD
  *
@@ -2511,7 +2511,7 @@ hdy_tab_view_reorder_forward (HdyTabView *self,
 /**
  * hdy_tab_view_reorder_first:
  * @self: a #HdyTabView
- * @page: TBD
+ * @page: a page of @self
  *
  * TBD
  *
@@ -2538,7 +2538,7 @@ hdy_tab_view_reorder_first (HdyTabView *self,
 /**
  * hdy_tab_view_reorder_last:
  * @self: a #HdyTabView
- * @page: TBD
+ * @page: a page of @self
  *
  * TBD
  *
@@ -2594,8 +2594,8 @@ hdy_tab_view_attach_page (HdyTabView *self,
 /**
  * hdy_tab_view_transfer_page:
  * @self: a #HdyTabView
- * @page: TBD
- * @other_view: TBD
+ * @page: a page of @self
+ * @other_view:
  * @position: TBD
  *
  * TBD
@@ -2622,9 +2622,10 @@ hdy_tab_view_transfer_page (HdyTabView *self,
  * hdy_tab_view_get_pages:
  * @self: a #HdyTabView
  *
- * TBD
+ * Returns a #GListModel containing the pages of @self. This model can be used
+ * to keep an up to date view of the pages.
  *
- * Returns: (transfer none): TBD
+ * Returns: (transfer none): the model containing pages
  *
  * Since: 1.2
  */
