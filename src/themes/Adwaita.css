@@ -199,7 +199,7 @@ window.csd.unified:not(.solid-csd):not(.fullscreen) > decoration-overlay { box-s
 window.csd.unified:not(.solid-csd):not(.fullscreen):not(.tiled):not(.tiled-top):not(.tiled-bottom):not(.tiled-left):not(.tiled-right):not(.maximized), window.csd.unified:not(.solid-csd):not(.fullscreen):not(.tiled):not(.tiled-top):not(.tiled-bottom):not(.tiled-left):not(.tiled-right):not(.maximized) > decoration, window.csd.unified:not(.solid-csd):not(.fullscreen):not(.tiled):not(.tiled-top):not(.tiled-bottom):not(.tiled-left):not(.tiled-right):not(.maximized) > decoration-overlay { border-radius: 8px; }
 
 /* FIXME this should be inlined after we finalize the colors */
-tabbar .box { min-height: 38px; background: #c6bfb9; border-color: #bfb8b1; border-style: solid; }
+tabbar .box { min-height: 38px; background: #d4cfca; border-color: #bfb8b1; border-style: solid; }
 
 tabbar .box:backdrop { background-color: #e1dedb; border-color: #d5d0cc; }
 
@@ -225,25 +225,31 @@ tabbar.needs-attention-left undershoot.left { background: linear-gradient(to rig
 
 tabbar.needs-attention-right undershoot.right { background: linear-gradient(to left, rgba(53, 132, 228, 0.7), rgba(53, 132, 228, 0.5) 1px, rgba(53, 132, 228, 0) 20px); }
 
-tabbar tab { min-width: 130px; border-style: solid; border-color: #bfb8b1; border-width: 0 1px 0 1px; transition: background 150ms ease-in-out; background-color: #cdc7c2; }
+tabbar tab { min-width: 130px; border-style: solid; border-color: #bfb8b1; border-width: 0 1px 0 1px; transition: background 150ms ease-in-out; background-color: #dad6d2; }
 
-tabbar tab .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(205, 199, 194, 0), #cdc7c2 18px); }
+tabbar tab .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(218, 214, 210, 0), #dad6d2 18px); }
 
-tabbar tab .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(205, 199, 194, 0), #cdc7c2 18px); }
+tabbar tab .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(218, 214, 210, 0), #dad6d2 18px); }
 
 tabbar tab.pinned { min-width: 40px; }
 
-tabbar tab:checked { background-color: #dad6d2; }
+tabbar tab:checked { background-color: #e8e6e3; }
 
-tabbar tab:checked .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(218, 214, 210, 0), #dad6d2 18px); }
+tabbar tab:checked .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(232, 230, 227, 0), #e8e6e3 18px); }
 
-tabbar tab:checked .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(218, 214, 210, 0), #dad6d2 18px); }
+tabbar tab:checked .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(232, 230, 227, 0), #e8e6e3 18px); }
 
-tabbar tab:hover { background-color: #e6e3e0; }
+tabbar tab:checked:hover { background-color: #efedec; }
 
-tabbar tab:hover .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(230, 227, 224, 0), #e6e3e0 18px); }
+tabbar tab:checked:hover .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(239, 237, 236, 0), #efedec 18px); }
 
-tabbar tab:hover .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(230, 227, 224, 0), #e6e3e0 18px); }
+tabbar tab:checked:hover .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(239, 237, 236, 0), #efedec 18px); }
+
+tabbar tab:hover { background-color: #e1dedb; }
+
+tabbar tab:hover .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(225, 222, 219, 0), #e1dedb 18px); }
+
+tabbar tab:hover .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(225, 222, 219, 0), #e1dedb 18px); }
 
 tabbar tab:backdrop { border-color: #d5d0cc; background-color: #e8e6e3; }
 
@@ -259,7 +265,7 @@ tabbar tab:backdrop:checked .tab-close-button-scrim:dir(rtl) { background: linea
 
 tabbar tab:not(:hover):not(:checked) .tab-close-button-scrim { opacity: 0; }
 
-tabbar .start-action, tabbar .end-action { background: #cdc7c2; border-color: #bfb8b1; border-style: solid; transition: background 150ms ease-in-out; }
+tabbar .start-action, tabbar .end-action { background: #dad6d2; border-color: #bfb8b1; border-style: solid; transition: background 150ms ease-in-out; }
 
 tabbar .start-action:backdrop, tabbar .end-action:backdrop { border-color: #d5d0cc; background-color: #e8e6e3; }
 
@@ -273,11 +279,11 @@ tabbar .start-action:dir(rtl), tabbar .end-action:dir(ltr) { border-left-width: 
 
 tabbar .start-action:dir(rtl) > *, tabbar .end-action:dir(ltr) > * { margin-left: 1px; }
 
-.tab-drag-icon tab { min-height: 38px; background-color: #e6e3e0; box-shadow: 0 3px 9px 1px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.23), inset 0 1px rgba(255, 255, 255, 0.8); margin: 25px; }
+.tab-drag-icon tab { min-height: 38px; background-color: #efedec; box-shadow: 0 3px 9px 1px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.23), inset 0 1px rgba(255, 255, 255, 0.8); margin: 25px; }
 
-.tab-drag-icon tab .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(230, 227, 224, 0), #e6e3e0 18px); }
+.tab-drag-icon tab .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(239, 237, 236, 0), #efedec 18px); }
 
-.tab-drag-icon tab .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(230, 227, 224, 0), #e6e3e0 18px); }
+.tab-drag-icon tab .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(239, 237, 236, 0), #efedec 18px); }
 
 tabbar tab .tab-contents, .tab-drag-icon tab .tab-contents { padding: 6px; }
 

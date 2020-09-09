@@ -338,7 +338,7 @@ window.csd.unified:not(.solid-csd):not(.fullscreen) {
 
 /* FIXME this should be inlined after we finalize the colors */
 
-$tab_selected_bg:           darken(darken($bg_color, 10%), 2%);
+$tab_selected_bg:           darken($bg_color, 6%);
 $tab_selected_bg_backdrop:  $bg_color;
 
 @if $variant == 'dark' {
@@ -351,7 +351,8 @@ $tab_bg_backdrop:           darken($tab_selected_bg_backdrop, 6%);
 $tab_bar_bg:                darken($tab_selected_bg, 9%);
 $tab_bar_bg_backdrop:       darken($tab_selected_bg_backdrop, 9%);
 
-$tab_hover_bg:              lighten($tab_selected_bg, 5%);
+$tab_hover_bg:              lighten($tab_bg, 3%);
+$tab_selected_hover_bg:     lighten($tab_selected_bg, 3%);
 
 @if $variant == 'dark' {
   $tab_bg:                  darken($tab_selected_bg, 3%);
@@ -478,6 +479,10 @@ tabbar {
 
     &:checked {
       @include tab-background($tab_selected_bg);
+
+      &:hover {
+        @include tab-background($tab_selected_hover_bg);
+      }
     }
 
     &:hover {
@@ -538,7 +543,7 @@ tabbar {
 .tab-drag-icon {
   tab {
     min-height: 38px;
-    @include tab-background($tab_hover_bg);
+    @include tab-background($tab_selected_hover_bg);
 
     $_wm_border: if($variant=='light', transparentize(black, 0.77), transparentize($borders_color, 0.1));
 

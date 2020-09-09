@@ -239,6 +239,12 @@ tabbar tab:checked .tab-close-button-scrim:dir(ltr) { background: linear-gradien
 
 tabbar tab:checked .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(32, 32, 32, 0), #202020 18px); }
 
+tabbar tab:checked:hover { background-color: #282828; }
+
+tabbar tab:checked:hover .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(40, 40, 40, 0), #282828 18px); }
+
+tabbar tab:checked:hover .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(40, 40, 40, 0), #282828 18px); }
+
 tabbar tab:hover { background-color: #353535; }
 
 tabbar tab:hover .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(53, 53, 53, 0), #353535 18px); }
@@ -273,11 +279,11 @@ tabbar .start-action:dir(rtl), tabbar .end-action:dir(ltr) { border-left-width: 
 
 tabbar .start-action:dir(rtl) > *, tabbar .end-action:dir(ltr) > * { margin-left: 1px; }
 
-.tab-drag-icon tab { min-height: 38px; background-color: #353535; box-shadow: 0 3px 9px 1px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(104, 104, 104, 0.9), inset 0 1px rgba(238, 238, 236, 0.07); margin: 25px; }
+.tab-drag-icon tab { min-height: 38px; background-color: #282828; box-shadow: 0 3px 9px 1px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(104, 104, 104, 0.9), inset 0 1px rgba(238, 238, 236, 0.07); margin: 25px; }
 
-.tab-drag-icon tab .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(53, 53, 53, 0), #353535 18px); }
+.tab-drag-icon tab .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(40, 40, 40, 0), #282828 18px); }
 
-.tab-drag-icon tab .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(53, 53, 53, 0), #353535 18px); }
+.tab-drag-icon tab .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(40, 40, 40, 0), #282828 18px); }
 
 tabbar tab .tab-contents, .tab-drag-icon tab .tab-contents { padding: 6px; }
 

@@ -239,6 +239,12 @@ tabbar tab:checked .tab-close-button-scrim:dir(ltr) { background: linear-gradien
 
 tabbar tab:checked .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(38, 38, 38, 0), #262626 18px); }
 
+tabbar tab:checked:hover { background-color: #2d2d2d; }
+
+tabbar tab:checked:hover .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(45, 45, 45, 0), #2d2d2d 18px); }
+
+tabbar tab:checked:hover .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(45, 45, 45, 0), #2d2d2d 18px); }
+
 tabbar tab:hover { background-color: #3a3a3a; }
 
 tabbar tab:hover .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(58, 58, 58, 0), #3a3a3a 18px); }
@@ -273,11 +279,11 @@ tabbar .start-action:dir(rtl), tabbar .end-action:dir(ltr) { border-left-width: 
 
 tabbar .start-action:dir(rtl) > *, tabbar .end-action:dir(ltr) > * { margin-left: 1px; }
 
-.tab-drag-icon tab { min-height: 38px; background-color: #3a3a3a; box-shadow: 0 3px 9px 1px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(27, 27, 27, 0.9), inset 0 1px rgba(238, 238, 236, 0.07); margin: 25px; }
+.tab-drag-icon tab { min-height: 38px; background-color: #2d2d2d; box-shadow: 0 3px 9px 1px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(27, 27, 27, 0.9), inset 0 1px rgba(238, 238, 236, 0.07); margin: 25px; }
 
-.tab-drag-icon tab .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(58, 58, 58, 0), #3a3a3a 18px); }
+.tab-drag-icon tab .tab-close-button-scrim:dir(ltr) { background: linear-gradient(to right, rgba(45, 45, 45, 0), #2d2d2d 18px); }
 
-.tab-drag-icon tab .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(58, 58, 58, 0), #3a3a3a 18px); }
+.tab-drag-icon tab .tab-close-button-scrim:dir(rtl) { background: linear-gradient(to left, rgba(45, 45, 45, 0), #2d2d2d 18px); }
 
 tabbar tab .tab-contents, .tab-drag-icon tab .tab-contents { padding: 6px; }
 
