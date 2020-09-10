@@ -141,6 +141,7 @@ struct _HdyTabBox
   gint detached_index;
   TabInfo *reorder_placeholder;
   HdyTabPage *placeholder_page;
+  gint placeholder_scroll_offset;
   gboolean can_remove_placeholder;
   DragIcon *drag_icon;
   gboolean should_detach_into_new_window;
@@ -1644,8 +1645,8 @@ insert_placeholder (HdyTabBox  *self,
                     HdyTabPage *page,
                     gint        pos)
 {
-  gdouble initial_progress = 0;
   TabInfo *info = self->reorder_placeholder;
+  gdouble initial_progress = 0;
 
   if (info) {
     initial_progress = info->appear_progress;
@@ -1660,14 +1661,17 @@ insert_placeholder (HdyTabBox  *self,
     info = create_tab_info (self, page);
 
     info->reorder_ignore_bounds = TRUE;
+    self->placeholder_scroll_offset = hdy_tab_get_child_min_width (info->tab) / 2;
 
-    index = calculate_placeholder_index (self, pos);
+    index = calculate_placeholder_index (self, pos + self->placeholder_scroll_offset);
 
     self->tabs = g_list_insert (self->tabs, info, index);
     self->n_tabs++;
 
     self->reorder_placeholder = info;
     self->reorder_index = g_list_index (self->tabs, info);
+
+    animate_scroll_relative (self, self->placeholder_scroll_offset, OPEN_ANIMATION_DURATION);
   }
 
   info->appear_animation =
@@ -1699,6 +1703,7 @@ replace_placeholder (HdyTabBox  *self,
   TabInfo *info = self->reorder_placeholder;
   gdouble initial_progress;
 
+  self->placeholder_scroll_offset = 0;
   gtk_widget_show (GTK_WIDGET (self->reorder_placeholder->tab));
 
   if (!info->appear_animation) {
@@ -1760,6 +1765,15 @@ remove_animation_done_cb (gpointer user_data)
   self->reorder_placeholder = NULL;
 }
 
+static gboolean
+remove_placeholder_scroll_cb (HdyTabBox *self)
+{
+  animate_scroll_relative (self, -self->placeholder_scroll_offset, CLOSE_ANIMATION_DURATION);
+  self->placeholder_scroll_offset = 0;
+
+  return G_SOURCE_REMOVE;
+}
+
 static void
 remove_placeholder (HdyTabBox *self)
 {
@@ -1773,6 +1787,8 @@ remove_placeholder (HdyTabBox *self)
 
   if (info->appear_animation)
     hdy_animation_stop (info->appear_animation);
+
+  g_idle_add ((GSourceFunc) remove_placeholder_scroll_cb, self);
 
   info->appear_animation =
     hdy_animation_new (GTK_WIDGET (self), info->appear_progress, 0,
@@ -2781,6 +2797,9 @@ hdy_tab_box_drag_begin (GtkWidget      *widget,
   hdy_tab_view_detach_page (self->view, self->detached_page);
 
   self->indirect_reordering = FALSE;
+  self->placeholder_scroll_offset = hdy_tab_get_child_min_width (detached_tab->tab) / 2;
+
+  animate_scroll_relative (self, -self->placeholder_scroll_offset, CLOSE_ANIMATION_DURATION);
 }
 
 static void
