@@ -101,8 +101,6 @@ enum {
   SIGNAL_PAGE_ADDED,
   SIGNAL_PAGE_REMOVED,
   SIGNAL_PAGE_REORDERED,
-  SIGNAL_PAGE_PINNED,
-  SIGNAL_PAGE_UNPINNED,
   SIGNAL_CLOSE_PAGE,
   SIGNAL_SETUP_MENU,
   SIGNAL_CREATE_WINDOW,
@@ -1022,9 +1020,9 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    * HdyTabView::page-reordered:
    * @self: a #HdyTabView
    * @page: a page of @self
-   * @position: TBD
+   * @position: the position @page was moved to, starting at 0
    *
-   * TBD
+   * This signal is emitted after @page has been reordered to @position.
    *
    * Since: 1.2
    */
@@ -1037,44 +1035,6 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                   G_TYPE_NONE,
                   2,
                   HDY_TYPE_TAB_PAGE, G_TYPE_INT);
-
-  /**
-   * HdyTabView::page-pinned:
-   * @self: a #HdyTabView
-   * @page: a page of @self
-   *
-   * TBD
-   *
-   * Since: 1.2
-   */
-  signals[SIGNAL_PAGE_PINNED] =
-    g_signal_new ("page-pinned",
-                  G_TYPE_FROM_CLASS (klass),
-                  G_SIGNAL_RUN_LAST,
-                  0,
-                  NULL, NULL, NULL,
-                  G_TYPE_NONE,
-                  1,
-                  HDY_TYPE_TAB_PAGE);
-
-  /**
-   * HdyTabView::page-unpinned:
-   * @self: a #HdyTabView
-   * @page: a page of @self
-   *
-   * TBD
-   *
-   * Since: 1.2
-   */
-  signals[SIGNAL_PAGE_UNPINNED] =
-    g_signal_new ("page-unpinned",
-                  G_TYPE_FROM_CLASS (klass),
-                  G_SIGNAL_RUN_LAST,
-                  0,
-                  NULL, NULL, NULL,
-                  G_TYPE_NONE,
-                  1,
-                  HDY_TYPE_TAB_PAGE);
 
   /**
    * HdyTabView::close-page:
@@ -2067,62 +2027,6 @@ hdy_tab_view_set_group (HdyTabView *self,
                         GSList     *group)
 {
   g_return_if_fail (HDY_IS_TAB_VIEW (self));
-
-  if (g_slist_find (group, self))
-    return;
-
-  if (self->group) {
-    GSList *l;
-
-    self->group = g_slist_remove (self->group, self);
-
-    for (l = self->group; l; l = l->next) {
-      HdyTabView *view = l->data;
-
-      view->group = self->group;
-    }
-  }
-
-  self->group = g_slist_prepend (group, self);
-
-  if (group) {
-    GSList *l;
-
-    for (l = group; l; l = l->next) {
-      HdyTabView *view = l->data;
-
-      view->group = self->group;
-    }
-  }
-}
-
-/**
- * hdy_tab_view_join_group:
- * @self: a #HdyTabView
- * @source: TBD
- *
- * TBD doesn't work
- *
- * Since: 1.2
- */
-void
-hdy_tab_view_join_group (HdyTabView *self,
-                         HdyTabView *source)
-{
-  g_return_if_fail (HDY_IS_TAB_VIEW (self));
-  g_return_if_fail (source == NULL || HDY_IS_TAB_VIEW (source));
-
-  if (source) {
-    GSList *group = hdy_tab_view_get_group (source);
-
-    if (!group) {
-        hdy_tab_view_set_group (source, NULL);
-        group = hdy_tab_view_get_group (source);
-      }
-
-    hdy_tab_view_set_group (self, group);
-  } else
-    hdy_tab_view_set_group (self, NULL);
 }
 
 /**
@@ -2148,7 +2052,7 @@ hdy_tab_view_join_group (HdyTabView *self,
  * following order:
  *
  * 1. #HdyTabPage:secondary-icon
- * 2. A spinner if #HdyTabPage::loading is %TRUE
+ * 2. A spinner if #HdyTabPage:loading is %TRUE
  * 3. #HdyTabPage:icon
  * 4. #HdyTabView:default-icon
  *
@@ -2183,8 +2087,6 @@ hdy_tab_view_set_page_pinned (HdyTabView *self,
 
   g_list_store_insert (self->pages, pos, page);
 
-  set_page_pinned (page, pinned);
-
   if (pinned)
     pos++;
 
@@ -2195,10 +2097,7 @@ hdy_tab_view_set_page_pinned (HdyTabView *self,
 
   set_n_pinned_pages (self, pos);
 
-  if (pinned)
-    g_signal_emit (self, signals[SIGNAL_PAGE_PINNED], 0, page);
-  else
-    g_signal_emit (self, signals[SIGNAL_PAGE_UNPINNED], 0, page);
+  set_page_pinned (page, pinned);
 }
 
 /**

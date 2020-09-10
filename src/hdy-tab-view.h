@@ -120,9 +120,6 @@ GSList *hdy_tab_view_get_group  (HdyTabView *self);
 HDY_AVAILABLE_IN_ALL
 void    hdy_tab_view_set_group  (HdyTabView *self,
                                  GSList     *group);
-HDY_AVAILABLE_IN_ALL
-void    hdy_tab_view_join_group (HdyTabView *self,
-                                 HdyTabView *source);
 
 HDY_AVAILABLE_IN_ALL
 void hdy_tab_view_set_page_pinned (HdyTabView *self,

@@ -120,31 +120,46 @@ notify_selected_page_cb (HdyTabBar *self)
 }
 
 static void
-page_pinned_cb (HdyTabBar  *self,
-                HdyTabPage *page)
+notify_pinned_cb (HdyTabPage *page,
+                  GParamSpec *pspec,
+                  HdyTabBar  *self)
 {
-  gboolean should_focus = hdy_tab_box_is_page_focused (self->scroll_box, page);
+  HdyTabBox *from, *to;
+  gboolean should_focus;
 
-  hdy_tab_box_remove_page (self->scroll_box, page);
-  hdy_tab_box_add_page (self->pinned_box, page,
-                        hdy_tab_view_get_n_pinned_pages (self->view));
+  if (hdy_tab_page_get_pinned (page)) {
+    from = self->scroll_box;
+    to = self->pinned_box;
+  } else {
+    from = self->pinned_box;
+    to = self->scroll_box;
+  }
+
+  should_focus = hdy_tab_box_is_page_focused (from, page);
+
+  hdy_tab_box_remove_page (from, page);
+  hdy_tab_box_add_page (to, page, hdy_tab_view_get_n_pinned_pages (self->view));
 
   if (should_focus)
-    hdy_tab_box_try_focus_selected_tab (self->pinned_box);
+    hdy_tab_box_try_focus_selected_tab (to);
 }
 
 static void
-page_unpinned_cb (HdyTabBar  *self,
-                  HdyTabPage *page)
+page_added_cb (HdyTabBar  *self,
+               HdyTabPage *page,
+               gint        position)
 {
-  gboolean should_focus = hdy_tab_box_is_page_focused (self->pinned_box, page);
+  g_signal_connect_object (page, "notify::pinned",
+                           G_CALLBACK (notify_pinned_cb), self,
+                           0);
+}
 
-  hdy_tab_box_remove_page (self->pinned_box, page);
-  hdy_tab_box_add_page (self->scroll_box, page,
-                        hdy_tab_view_get_n_pinned_pages (self->view));
-
-  if (should_focus)
-    hdy_tab_box_try_focus_selected_tab (self->scroll_box);
+static void
+page_removed_cb (HdyTabBox  *self,
+                 HdyTabPage *page,
+                 gint        position)
+{
+  g_signal_handlers_disconnect_by_func (page, notify_pinned_cb, self);
 }
 
 static void
@@ -581,8 +596,6 @@ hdy_tab_bar_set_view (HdyTabBar  *self,
   if (self->view) {
     g_signal_handlers_disconnect_by_func (self->view, update_autohide_cb, self);
     g_signal_handlers_disconnect_by_func (self->view, notify_selected_page_cb, self);
-    g_signal_handlers_disconnect_by_func (self->view, page_pinned_cb, self);
-    g_signal_handlers_disconnect_by_func (self->view, page_unpinned_cb, self);
   }
 
   g_set_object (&self->view, view);
@@ -600,11 +613,11 @@ hdy_tab_bar_set_view (HdyTabBar  *self,
     g_signal_connect_object (self->view, "notify::selected-page",
                              G_CALLBACK (notify_selected_page_cb), self,
                              G_CONNECT_SWAPPED);
-    g_signal_connect_object (self->view, "page-pinned",
-                             G_CALLBACK (page_pinned_cb), self,
+    g_signal_connect_object (self->view, "page-added",
+                             G_CALLBACK (page_added_cb), self,
                              G_CONNECT_SWAPPED);
-    g_signal_connect_object (self->view, "page-unpinned",
-                             G_CALLBACK (page_unpinned_cb), self,
+    g_signal_connect_object (self->view, "page-removed",
+                             G_CALLBACK (page_removed_cb), self,
                              G_CONNECT_SWAPPED);
     g_signal_connect_object (self->view, "destroy",
                              G_CALLBACK (view_destroy_cb), self,
