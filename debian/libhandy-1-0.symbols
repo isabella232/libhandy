@@ -318,7 +318,7 @@ libhandy-1.so.0 libhandy-1-0 #MINVER#
  hdy_tab_view_close_pages_before@LIBHANDY_1_0 1.0.0
  hdy_tab_view_get_default_icon@LIBHANDY_1_0 1.0.0
  hdy_tab_view_get_group@LIBHANDY_1_0 1.0.0
- hdy_tab_view_get_is_dragging@LIBHANDY_1_0 1.0.0
+ hdy_tab_view_get_is_transferring_tab@LIBHANDY_1_0 1.0.0
  hdy_tab_view_get_menu_model@LIBHANDY_1_0 1.0.0
  hdy_tab_view_get_n_pages@LIBHANDY_1_0 1.0.0
  hdy_tab_view_get_n_pinned_pages@LIBHANDY_1_0 1.0.0

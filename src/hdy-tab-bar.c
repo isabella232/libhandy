@@ -81,7 +81,7 @@ static void
 update_autohide_cb (HdyTabBar *self)
 {
   gint n_tabs = 0, n_pinned_tabs = 0;
-  gboolean is_dragging;
+  gboolean is_transferring_tab;
 
   if (!self->view) {
     set_tabs_revealed (self, FALSE);
@@ -91,9 +91,9 @@ update_autohide_cb (HdyTabBar *self)
 
   n_tabs = hdy_tab_view_get_n_pages (self->view);
   n_pinned_tabs = hdy_tab_view_get_n_pinned_pages (self->view);
-  is_dragging = hdy_tab_view_get_is_dragging (self->view);
+  is_transferring_tab = hdy_tab_view_get_is_transferring_tab (self->view);
 
-  set_tabs_revealed (self, n_tabs > 1 || n_pinned_tabs >= 1 || is_dragging);
+  set_tabs_revealed (self, n_tabs > 1 || n_pinned_tabs >= 1 || is_transferring_tab);
 }
 
 static void
@@ -588,7 +588,7 @@ hdy_tab_bar_set_view (HdyTabBar  *self,
   g_set_object (&self->view, view);
 
   if (self->view) {
-    g_signal_connect_object (self->view, "notify::is-dragging",
+    g_signal_connect_object (self->view, "notify::is-transferring-tab",
                              G_CALLBACK (update_autohide_cb), self,
                              G_CONNECT_SWAPPED);
     g_signal_connect_object (self->view, "notify::n-pages",

@@ -78,7 +78,7 @@ struct _HdyTabView
   GMenuModel *menu_model;
 
   GSList *group;
-  gboolean is_dragging;
+  gboolean is_transferring_tab;
 };
 
 G_DEFINE_TYPE (HdyTabView, hdy_tab_view, GTK_TYPE_BIN)
@@ -87,7 +87,7 @@ enum {
   PROP_0,
   PROP_N_PAGES,
   PROP_N_PINNED_PAGES,
-  PROP_IS_DRAGGING,
+  PROP_IS_TRANSFERRING_TAB,
   PROP_SELECTED_PAGE,
   PROP_DEFAULT_ICON,
   PROP_MENU_MODEL,
@@ -314,98 +314,132 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
   /**
    * HdyTabPage:title:
    *
-   * TBD
+   * The title of the page.
+   *
+   * #HdyTabBar will display it in the center of the tab unless it's pinned,
+   * and will use it as a tooltip unless #HdyTabPage:tooltip is set.
    *
    * Since: 1.2
    */
   page_props[PAGE_PROP_TITLE] =
     g_param_spec_string ("title",
                          _("Title"),
-                         _("Title"),
+                         _("The title of the page"),
                          NULL,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabPage:tooltip:
    *
-   * TBD
+   * The tooltip of this page, marked up with the
+   * [Pango text markup language][PangoMarkupFormat].
+   *
+   * If not set, #HdyTabBar will use #HdyTabPage:title as a tooltip instead.
    *
    * Since: 1.2
    */
   page_props[PAGE_PROP_TOOLTIP] =
     g_param_spec_string ("tooltip",
                          _("Tooltip"),
-                         _("Tooltip"),
+                         _("The tooltip of the page"),
                          NULL,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabPage:icon:
    *
-   * TBD
+   * The icon of this page, displayed next to the title.
+   *
+   * #HdyTabBar will not show the icon if #HdyTabPage:loading is set to %TRUE,
+   * or if the page is pinned and #HdyTabPage:secondary-icon is set.
    *
    * Since: 1.2
    */
   page_props[PAGE_PROP_ICON] =
     g_param_spec_object ("icon",
                          _("Icon"),
-                         _("Icon"),
+                         _("The icon of the page"),
                          G_TYPE_ICON,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabPage:loading:
    *
-   * TBD
+   * Whether the page is loading.
+   *
+   * If set to %TRUE, #HdyTabBar will display a spinner in place of icon.
+   *
+   * If the page is pinned and #HdyTabPage:secondary-icon is set, the loading
+   * status will not be visible.
    *
    * Since: 1.2
    */
   page_props[PAGE_PROP_LOADING] =
     g_param_spec_boolean ("loading",
                          _("Loading"),
-                         _("Loading"),
+                         _("Whether the page is loading"),
                          FALSE,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabPage:secondary-icon:
    *
-   * TBD
+   * A secondary icon for the page.
+   *
+   * A common use case is an audio or camera indicator in a web browser.
+   *
+   * #HdyTabPage will show it at the beginning of the tab, alongside icon
+   * representing #HdyTabPage:icon or loading spinner.
+   *
+   * If the page is pinned, secondary icon will be shown instead of icon or
+   * spinner.
+   *
+   * If #HdyTabPage:secondary-icon-activatable is set to %TRUE, secondary icon
+   * can act as a button.
    *
    * Since: 1.2
    */
   page_props[PAGE_PROP_SECONDARY_ICON] =
     g_param_spec_object ("secondary-icon",
-                         _("Secondary Icon"),
-                         _("Secondary Icon"),
+                         _("Secondary icon"),
+                         _("A secondary icon for the page"),
                          G_TYPE_ICON,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabPage:secondary-icon-activatable:
    *
-   * TBD
+   * Whether the secondary icon is activatable.
+   *
+   * If set to %TRUE, #HdyTabView::secondary-icon-activated will be emitted when
+   * the secondary icon is clicked.
+   *
+   * If #HdyTabPage:secondary-icon is not set, does nothing.
    *
    * Since: 1.2
    */
   page_props[PAGE_PROP_SECONDARY_ICON_ACTIVATABLE] =
     g_param_spec_boolean ("secondary-icon-activatable",
-                         _("Secondary Icon Activatable"),
-                         _("Secondary Icon Activatable"),
+                         _("Secondary icon activatable"),
+                         _("Whether the secondary icon is activatable"),
                          FALSE,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabPage:needs-attention:
    *
-   * TBD
+   * Whether the page needs attention.
+   *
+   * #HdyTabBar will display a glow under the tab if set to %TRUE. If the tab
+   * representing the page is not visible, the corresponding edge of the tab
+   * bar will be highlighted.
    *
    * Since: 1.2
    */
   page_props[PAGE_PROP_NEEDS_ATTENTION] =
     g_param_spec_boolean ("needs-attention",
-                         _("Needs Attention"),
-                         _("Needs Attention"),
+                         _("Needs attention"),
+                         _("Whether the page needs attention"),
                          FALSE,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
@@ -431,15 +465,15 @@ object_handled_accumulator (GSignalInvocationHint *ihint,
 }
 
 static void
-set_is_dragging (HdyTabView *self,
-                 gboolean    is_dragging)
+set_is_transferring_tab (HdyTabView *self,
+                         gboolean    is_transferring_tab)
 {
-  if (is_dragging == self->is_dragging)
+  if (is_transferring_tab == self->is_transferring_tab)
     return;
 
-  self->is_dragging = is_dragging;
+  self->is_transferring_tab = is_transferring_tab;
 
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_DRAGGING]);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_TRANSFERRING_TAB]);
 }
 
 static void
@@ -748,8 +782,8 @@ hdy_tab_view_get_property (GObject    *object,
     g_value_set_int (value, hdy_tab_view_get_n_pinned_pages (self));
     break;
 
-  case PROP_IS_DRAGGING:
-    g_value_set_boolean (value, hdy_tab_view_get_is_dragging (self));
+  case PROP_IS_TRANSFERRING_TAB:
+    g_value_set_boolean (value, hdy_tab_view_get_is_transferring_tab (self));
     break;
 
   case PROP_SELECTED_PAGE:
@@ -814,91 +848,110 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
   /**
    * HdyTabView:n-pages:
    *
-   * TBD
+   * The number of pages in the tab view.
    *
    * Since: 1.2
    */
   props[PROP_N_PAGES] =
     g_param_spec_int ("n-pages",
-                      _("Number of Pages"),
-                      _("Number of Pages"),
+                      _("Number of pages"),
+                      _("The number of pages in the tab view"),
                       0, G_MAXINT, 0,
                       G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabView:n-pinned-pages:
    *
-   * TBD
+   * The number of pinned pages in the tab view.
+   *
+   * See hdy_tab_view_set_page_pinned()
    *
    * Since: 1.2
    */
   props[PROP_N_PINNED_PAGES] =
     g_param_spec_int ("n-pinned-pages",
-                      _("Number of Pinned Pages"),
-                      _("Number of Pinned Pages"),
+                      _("Number of pinned pages"),
+                      _("The number of pinned pages in the tab view"),
                       0, G_MAXINT, 0,
                       G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
-   * HdyTabView:is-dragging:
+   * HdyTabView:is-transferring-tab:
    *
-   * TBD
+   * Whether a tab is being transferred.
+   *
+   * This property will be set to %TRUE when a drag-n-drop tab transfer starts,
+   * and to %FALSE after it ends.
+   *
+   * During the transfer, children cannot receive pointer input and a tab can
+   * be safely dropped on the tab view.
    *
    * Since: 1.2
    */
-  props[PROP_IS_DRAGGING] =
-    g_param_spec_boolean ("is-dragging",
-                          _("Is Dragging"),
-                          _("Is Dragging"),
+  props[PROP_IS_TRANSFERRING_TAB] =
+    g_param_spec_boolean ("is-transferring-tab",
+                          _("Is transferring tab"),
+                          _("Whether a tab is being transferred"),
                           FALSE,
                           G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabView:selected-page:
    *
-   * TBD
+   * The currently selected page.
    *
    * Since: 1.2
    */
   props[PROP_SELECTED_PAGE] =
     g_param_spec_object ("selected-page",
-                         _("Selected Page"),
-                         _("Selected Page"),
+                         _("Selected page"),
+                         _("The currently selected page"),
                          HDY_TYPE_TAB_PAGE,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabView:default-icon:
    *
-   * TBD
+   * Default page icon.
+   *
+   * If a page doesn't provide its own icon via #HdyTabPage:icon, default icon
+   * may be used instead, depending on context.
+   *
+   * #HdyTabBar will use default icon for pinned tabs in case the page is not
+   * loading, doesn't have icon and secondary icon. Default icon is never used
+   * for tabs that aren't pinned.
    *
    * Since: 1.2
    */
   props[PROP_DEFAULT_ICON] =
     g_param_spec_object ("default-icon",
-                         _("Default Icon"),
-                         _("Default Icon"),
+                         _("Default icon"),
+                         _("Default page icon"),
                          G_TYPE_ICON,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabView:menu-model:
    *
-   * TBD
+   * Tab context menu model.
+   *
+   * When a context menu is shown for a tab, it will be constructed from the
+   * provided menu model. Use #HdyTabView::setup-menu signal to set up the menu
+   * actions for the particular tab.
    *
    * Since: 1.2
    */
   props[PROP_MENU_MODEL] =
     g_param_spec_object ("menu-model",
-                         _("Menu Model"),
-                         _("Menu Model"),
+                         _("Menu model"),
+                         _("Tab context menu model"),
                          G_TYPE_MENU_MODEL,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabView:group:
    *
-   * TBD
+   * TBD this API doesn't work, replace it something that does work
    *
    * Since: 1.2
    */
@@ -1153,7 +1206,7 @@ hdy_tab_view_init (HdyTabView *self)
   gtk_widget_add_events (drag_shield, GDK_ALL_EVENTS_MASK);
   gtk_overlay_add_overlay (GTK_OVERLAY (overlay), drag_shield);
 
-  g_object_bind_property (self, "is-dragging",
+  g_object_bind_property (self, "is-transferring-tab",
                           drag_shield, "visible",
                           G_BINDING_DEFAULT);
 
@@ -1575,7 +1628,7 @@ hdy_tab_view_get_n_pinned_pages (HdyTabView *self)
 }
 
 /**
- * hdy_tab_view_get_is_dragging:
+ * hdy_tab_view_get_is_transferring_tab:
  * @self: a #HdyTabView
  *
  * TBD
@@ -1585,11 +1638,11 @@ hdy_tab_view_get_n_pinned_pages (HdyTabView *self)
  * Since: 1.2
  */
 gboolean
-hdy_tab_view_get_is_dragging (HdyTabView *self)
+hdy_tab_view_get_is_transferring_tab (HdyTabView *self)
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
 
-  return self->is_dragging;
+  return self->is_transferring_tab;
 }
 
 void
@@ -1602,7 +1655,7 @@ hdy_tab_view_start_drag (HdyTabView *self)
   for (l = tab_view_list; l; l = l->next) {
     HdyTabView *view = l->data;
 
-    set_is_dragging (view, TRUE);
+    set_is_transferring_tab (view, TRUE);
   }
 }
 
@@ -1616,7 +1669,7 @@ hdy_tab_view_end_drag (HdyTabView *self)
   for (l = tab_view_list; l; l = l->next) {
     HdyTabView *view = l->data;
 
-    set_is_dragging (view, FALSE);
+    set_is_transferring_tab (view, FALSE);
   }
 }
 

@@ -86,7 +86,7 @@ HDY_AVAILABLE_IN_ALL
 gint hdy_tab_view_get_n_pinned_pages (HdyTabView *self);
 
 HDY_AVAILABLE_IN_ALL
-gboolean hdy_tab_view_get_is_dragging (HdyTabView *self);
+gboolean hdy_tab_view_get_is_transferring_tab (HdyTabView *self);
 
 HDY_AVAILABLE_IN_ALL
 HdyTabPage *hdy_tab_view_get_selected_page (HdyTabView *self);
