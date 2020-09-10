@@ -330,7 +330,6 @@ libhandy-1.so.0 libhandy-1-0 #MINVER#
  hdy_tab_view_get_type@LIBHANDY_1_0 1.0.0
  hdy_tab_view_insert@LIBHANDY_1_0 1.0.0
  hdy_tab_view_insert_pinned@LIBHANDY_1_0 1.0.0
- hdy_tab_view_join_group@LIBHANDY_1_0 1.0.0
  hdy_tab_view_new@LIBHANDY_1_0 1.0.0
  hdy_tab_view_prepend@LIBHANDY_1_0 1.0.0
  hdy_tab_view_prepend_pinned@LIBHANDY_1_0 1.0.0
