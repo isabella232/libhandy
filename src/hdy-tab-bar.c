@@ -21,7 +21,22 @@
  *
  * # CSS nodes
  *
- * #HdyKeypad has a single CSS node with name keypad.
+ * #HdyTabBar has a single CSS node with name tabbar.
+ *
+ * |[<!-- language="plain" -->
+ * tabbar
+ * ╰── revealer
+ *     ╰── box
+ *         ├── widget.start-action
+ *         │   ╰── [ Start Action Widget ]
+ *         ├── tabbox.pinned
+ *         ├── scrolledwindow
+ *         │   ╰── tabbox
+ *         ╰── widget.end-action
+ *             ╰── [ End Action Widget ]
+ * ]|
+ *
+ * TODO this is all wrong; need to describe tabs
  *
  * Since: 1.2
  */

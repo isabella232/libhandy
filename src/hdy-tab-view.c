@@ -24,6 +24,14 @@ static const GtkTargetEntry dst_targets [] = {
  *
  * TBD
  *
+ * |[<!-- language="plain" -->
+ * tabview
+ * ╰── overlay
+ *     ├── stack
+ *     │   ╰── [ Children ]
+ *     ╰── widget
+ * ]|
+ *
  * Since: 1.2
  */
 
