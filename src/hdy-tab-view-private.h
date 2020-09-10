@@ -14,9 +14,6 @@
 
 G_BEGIN_DECLS
 
-void hdy_tab_view_start_drag (HdyTabView *self);
-void hdy_tab_view_end_drag (HdyTabView *self);
-
 void hdy_tab_view_detach_page   (HdyTabView *self,
                                  HdyTabPage *page);
 void hdy_tab_view_attach_page   (HdyTabView *self,

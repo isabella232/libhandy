@@ -2777,7 +2777,6 @@ hdy_tab_box_drag_begin (GtkWidget      *widget,
   gtk_widget_hide (GTK_WIDGET (detached_tab->tab));
   self->detached_index = hdy_tab_view_get_page_position (self->view, detached_tab->page);
 
-  hdy_tab_view_start_drag (self->view);
   hdy_tab_view_detach_page (self->view, self->detached_page);
 
   self->indirect_reordering = FALSE;
@@ -2799,8 +2798,6 @@ hdy_tab_box_drag_end (GtkWidget      *widget,
 
   gtk_widget_destroy (self->drag_icon->window);
   g_clear_pointer (&self->drag_icon, g_free);
-
-  hdy_tab_view_end_drag (self->view);
 }
 
 static gboolean

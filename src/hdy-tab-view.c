@@ -272,14 +272,14 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
   /**
    * HdyTabPage:child:
    *
-   * The child for this page.
+   * The child of the page.
    *
    * Since: 1.2
    */
   page_props[PAGE_PROP_CHILD] =
     g_param_spec_object ("child",
                          _("Child"),
-                         _("The child for this page"),
+                         _("The child of the page"),
                          GTK_TYPE_WIDGET,
                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
 
@@ -331,8 +331,7 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
   /**
    * HdyTabPage:tooltip:
    *
-   * The tooltip of this page, marked up with the
-   * [Pango text markup language][PangoMarkupFormat].
+   * The tooltip of the page, marked up with the Pango text markup language.
    *
    * If not set, #HdyTabBar will use #HdyTabPage:title as a tooltip instead.
    *
@@ -348,7 +347,7 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
   /**
    * HdyTabPage:icon:
    *
-   * The icon of this page, displayed next to the title.
+   * The icon of the page, displayed next to the title.
    *
    * #HdyTabBar will not show the icon if #HdyTabPage:loading is set to %TRUE,
    * or if the page is pinned and #HdyTabPage:secondary-icon is set.
@@ -430,9 +429,9 @@ hdy_tab_page_class_init (HdyTabPageClass *klass)
    *
    * Whether the page needs attention.
    *
-   * #HdyTabBar will display a glow under the tab if set to %TRUE. If the tab
-   * representing the page is not visible, the corresponding edge of the tab
-   * bar will be highlighted.
+   * #HdyTabBar will display a glow under the tab representing the page if set
+   * to %TRUE. If the tab is not visible, the corresponding edge of the tab bar
+   * will be highlighted.
    *
    * Since: 1.2
    */
@@ -474,6 +473,21 @@ set_is_transferring_tab (HdyTabView *self,
   self->is_transferring_tab = is_transferring_tab;
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_TRANSFERRING_TAB]);
+}
+
+static void
+set_is_transferring_tab_for_group (HdyTabView *self,
+                                   gboolean    is_transferring_tab)
+{
+  GSList *l;
+
+  g_return_if_fail (HDY_IS_TAB_VIEW (self));
+
+  for (l = tab_view_list; l; l = l->next) {
+    HdyTabView *view = l->data;
+
+    set_is_transferring_tab (view, is_transferring_tab);
+  }
 }
 
 static void
@@ -880,8 +894,8 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    *
    * Whether a tab is being transferred.
    *
-   * This property will be set to %TRUE when a drag-n-drop tab transfer starts,
-   * and to %FALSE after it ends.
+   * This property will be set to %TRUE when a drag-n-drop tab transfer starts
+   * on any #HdyTabView in the same group, and to %FALSE after it ends.
    *
    * During the transfer, children cannot receive pointer input and a tab can
    * be safely dropped on the tab view.
@@ -1223,9 +1237,9 @@ hdy_tab_view_init (HdyTabView *self)
  * hdy_tab_page_get_child:
  * @self: a #HdyTabPage
  *
- * TBD
+ * Gets the child of @self
  *
- * Returns: (transfer none): TBD
+ * Returns: (transfer none): the child of @self
  *
  * Since: 1.2
  */
@@ -1241,9 +1255,9 @@ hdy_tab_page_get_child (HdyTabPage *self)
  * hdy_tab_page_get_selected:
  * @self: a #HdyTabPage
  *
- * TBD
+ * Gets whether @self is selected. See hdy_tab_view_set_selected_page()
  *
- * Returns: TBD
+ * Returns: whether @self is selected
  *
  * Since: 1.2
  */
@@ -1259,9 +1273,9 @@ hdy_tab_page_get_selected (HdyTabPage *self)
  * hdy_tab_page_get_pinned:
  * @self: a #HdyTabPage
  *
- * TBD
+ * Gets whether @self is pinned. See hdy_tab_view_set_page_pinned()
  *
- * Returns: TBD
+ * Returns: whether @self is pinned
  *
  * Since: 1.2
  */
@@ -1277,9 +1291,9 @@ hdy_tab_page_get_pinned (HdyTabPage *self)
  * hdy_tab_page_get_title:
  * @self: a #HdyTabPage
  *
- * TBD
+ * Gets the title of @self, see hdy_tab_page_set_title()
  *
- * Returns: (nullable): TBD
+ * Returns: (nullable): the title of @self
  *
  * Since: 1.2
  */
@@ -1294,9 +1308,13 @@ hdy_tab_page_get_title (HdyTabPage *self)
 /**
  * hdy_tab_page_set_title:
  * @self: a #HdyTabPage
- * @title: (nullable): TBD
+ * @title: (nullable): the title of @self
  *
- * TBD
+ * Sets the title of @self.
+ *
+ * #HdyTabBar will display it in the center of the tab representing @self
+ * unless it's pinned, and will use it as a tooltip unless #HdyTabPage:tooltip
+ * is set.
  *
  * Since: 1.2
  */
@@ -1322,9 +1340,9 @@ hdy_tab_page_set_title (HdyTabPage  *self,
  * hdy_tab_page_get_tooltip:
  * @self: a #HdyTabPage
  *
- * TBD
+ * Gets the tooltip of @self, see hdy_tab_page_set_tooltip()
  *
- * Returns: (nullable): TBD
+ * Returns: (nullable): the tooltip of @self
  *
  * Since: 1.2
  */
@@ -1339,9 +1357,11 @@ hdy_tab_page_get_tooltip (HdyTabPage *self)
 /**
  * hdy_tab_page_set_tooltip:
  * @self: a #HdyTabPage
- * @tooltip: (nullable): TBD
+ * @tooltip: (nullable): the tooltip of @self
  *
- * TBD
+ * Sets the tooltip of @self, marked up with the Pango text markup language.
+ *
+ * If not set, #HdyTabBar will use #HdyTabPage:title as a tooltip instead.
  *
  * Since: 1.2
  */
@@ -1367,9 +1387,9 @@ hdy_tab_page_set_tooltip (HdyTabPage  *self,
  * hdy_tab_page_get_icon:
  * @self: a #HdyTabPage
  *
- * TBD
+ * Gets the icon of @self, see hdy_tab_page_set_icon()
  *
- * Returns: (transfer none) (nullable): TBD
+ * Returns: (transfer none) (nullable): the icon of @self
  *
  * Since: 1.2
  */
@@ -1384,9 +1404,12 @@ hdy_tab_page_get_icon (HdyTabPage *self)
 /**
  * hdy_tab_page_set_icon:
  * @self: a #HdyTabPage
- * @icon: (nullable): TBD
+ * @icon: (nullable): the icon of @self
  *
- * TBD
+ * Sets the icon of @self, displayed next to the title.
+ *
+ * #HdyTabBar will not show the icon if #HdyTabPage:loading is set to %TRUE,
+ * or if @self is pinned and #HdyTabPage:secondary-icon is set.
  *
  * Since: 1.2
  */
@@ -1409,9 +1432,9 @@ hdy_tab_page_set_icon (HdyTabPage *self,
  * hdy_tab_page_get_loading:
  * @self: a #HdyTabPage
  *
- * TBD
+ * Gets whether @self is loading, see hdy_tab_page_set_loading()
  *
- * Returns: TBD
+ * Returns: whether @self is loading
  *
  * Since: 1.2
  */
@@ -1426,9 +1449,14 @@ hdy_tab_page_get_loading (HdyTabPage *self)
 /**
  * hdy_tab_page_set_loading:
  * @self: a #HdyTabPage
- * @loading: TBD
+ * @loading: whether @self is loading
  *
- * TBD
+ * Sets wether @self is loading.
+ *
+ * If set to %TRUE, #HdyTabBar will display a spinner in place of icon.
+ *
+ * If @self is pinned and #HdyTabPage:secondary-icon is set, the loading
+ * status will not be visible.
  *
  * Since: 1.2
  */
@@ -1452,9 +1480,9 @@ hdy_tab_page_set_loading (HdyTabPage *self,
  * hdy_tab_page_get_secondary_icon:
  * @self: a #HdyTabPage
  *
- * TBD
+ * Gets the secondary icon of @self, see hdy_tab_page_set_secondary_icon()
  *
- * Returns: (transfer none) (nullable): TBD
+ * Returns: (transfer none) (nullable): the secondary icon of @self
  *
  * Since: 1.2
  */
@@ -1469,9 +1497,20 @@ hdy_tab_page_get_secondary_icon (HdyTabPage *self)
 /**
  * hdy_tab_page_set_secondary_icon:
  * @self: a #HdyTabPage
- * @secondary_icon: (nullable): TBD
+ * @secondary_icon: (nullable): the secondary icon of @self
  *
- * TBD
+ * Sets the secondary icon of @self.
+ *
+ * A common use case is an audio or camera indicator in a web browser.
+ *
+ * #HdyTabPage will show it at the beginning of the tab, alongside icon
+ * representing #HdyTabPage:icon or loading spinner.
+ *
+ * If the page is pinned, secondary icon will be shown instead of icon or
+ * spinner.
+ *
+ * If #HdyTabPage:secondary-icon-activatable is set to %TRUE, secondary icon
+ * can act as a button.
  *
  * Since: 1.2
  */
@@ -1494,9 +1533,11 @@ hdy_tab_page_set_secondary_icon (HdyTabPage *self,
  * hdy_tab_page_get_secondary_icon_activatable:
  * @self: a #HdyTabPage
  *
- * TBD
  *
- * Returns: TBD
+ * Gets whether the secondary icon of @self is activatable, see
+ * hdy_tab_page_set_secondary_icon_activatable()
+ *
+ * Returns: whether the secondary icon is activatable
  *
  * Since: 1.2
  */
@@ -1511,9 +1552,14 @@ hdy_tab_page_get_secondary_icon_activatable (HdyTabPage *self)
 /**
  * hdy_tab_page_set_secondary_icon_activatable:
  * @self: a #HdyTabPage
- * @activatable: TBD
+ * @activatable: whether the secondary icon is activatable
  *
- * TBD
+ * sets whether the secondary icon of @self is activatable.
+ *
+ * If set to %TRUE, #HdyTabView::secondary-icon-activated will be emitted when
+ * the secondary icon is clicked.
+ *
+ * If #HdyTabPage:secondary-icon is not set, does nothing.
  *
  * Since: 1.2
  */
@@ -1537,9 +1583,9 @@ hdy_tab_page_set_secondary_icon_activatable (HdyTabPage *self,
  * hdy_tab_page_get_needs_attention:
  * @self: a #HdyTabPage
  *
- * TBD
+ * Gets whether @self needs attention, see hdy_tab_page_set_needs_attention()
  *
- * Returns: TBD
+ * Returns: whether @self needs attention
  *
  * Since: 1.2
  */
@@ -1554,9 +1600,13 @@ hdy_tab_page_get_needs_attention (HdyTabPage *self)
 /**
  * hdy_tab_page_set_needs_attention:
  * @self: a #HdyTabPage
- * @needs_attention: TBD
+ * @needs_attention: whether @self needs attention
  *
- * TBD
+ * Sets whether @self needs attention.
+ *
+ * #HdyTabBar will display a glow under the tab representing @self if set to
+ * %TRUE. If the tab is not visible, the corresponding edge of the tab bar will
+ * be highlighted.
  *
  * Since: 1.2
  */
@@ -1595,9 +1645,9 @@ hdy_tab_view_new (void)
  * hdy_tab_view_get_n_pages:
  * @self: a #HdyTabView
  *
- * TBD
+ * Gets the number of pages in @self.
  *
- * Returns: TBD
+ * Returns: the number of pages in @self
  *
  * Since: 1.2
  */
@@ -1613,9 +1663,9 @@ hdy_tab_view_get_n_pages (HdyTabView *self)
  * hdy_tab_view_get_n_pinned_pages:
  * @self: a #HdyTabView
  *
- * TBD
+ * Gets the number of pinned pages in @self.
  *
- * Returns: TBD
+ * Returns: the number of pinned pages in @self
  *
  * Since: 1.2
  */
@@ -1631,9 +1681,11 @@ hdy_tab_view_get_n_pinned_pages (HdyTabView *self)
  * hdy_tab_view_get_is_transferring_tab:
  * @self: a #HdyTabView
  *
- * TBD
+ * Whether a tab is being transferred.
  *
- * Returns: TBD
+ * Gets the value of #HdyTabView::is-transferring-tab property.
+ *
+ * Returns: whether a tab is being transferred
  *
  * Since: 1.2
  */
@@ -1643,34 +1695,6 @@ hdy_tab_view_get_is_transferring_tab (HdyTabView *self)
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
 
   return self->is_transferring_tab;
-}
-
-void
-hdy_tab_view_start_drag (HdyTabView *self)
-{
-  GSList *l;
-
-  g_return_if_fail (HDY_IS_TAB_VIEW (self));
-
-  for (l = tab_view_list; l; l = l->next) {
-    HdyTabView *view = l->data;
-
-    set_is_transferring_tab (view, TRUE);
-  }
-}
-
-void
-hdy_tab_view_end_drag (HdyTabView *self)
-{
-  GSList *l;
-
-  g_return_if_fail (HDY_IS_TAB_VIEW (self));
-
-  for (l = tab_view_list; l; l = l->next) {
-    HdyTabView *view = l->data;
-
-    set_is_transferring_tab (view, FALSE);
-  }
 }
 
 /**
@@ -2624,6 +2648,8 @@ hdy_tab_view_detach_page (HdyTabView *self,
 
   g_object_ref (page);
 
+  set_is_transferring_tab_for_group (self, TRUE);
+
   detach_page (self, page);
 }
 
@@ -2640,6 +2666,10 @@ hdy_tab_view_attach_page (HdyTabView *self,
   attach_page (self, page, position);
 
   hdy_tab_view_set_selected_page (self, page);
+
+  /* FIXME: In theory it's possible to have multiple detached pages, should this
+   * be a count instead? */
+  set_is_transferring_tab_for_group (self, FALSE);
 
   g_object_unref (page);
 }
