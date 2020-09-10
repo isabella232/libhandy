@@ -50,6 +50,36 @@
           <object class="HdyTabBar">
             <property name="visible">True</property>
             <property name="view">view</property>
+            <child type="start">
+              <object class="GtkButton">
+                <property name="visible">True</property>
+                <property name="action-name">win.tab-new</property>
+                <style>
+                  <class name="flat"/>
+                </style>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="icon-name">list-add-symbolic</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="end">
+              <object class="GtkButton">
+                <property name="visible">True</property>
+                <property name="action-name">win.tab-new</property>
+                <style>
+                  <class name="flat"/>
+                </style>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="icon-name">list-add-symbolic</property>
+                  </object>
+                </child>
+              </object>
+            </child>
           </object>
         </child>
         <child>

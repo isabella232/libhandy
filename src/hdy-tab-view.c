@@ -18,11 +18,33 @@ static const GtkTargetEntry dst_targets [] = {
 
 /**
  * SECTION:hdy-tab-view
- * @short_description: TBD
+ * @short_description: A dynamic tabbed container
  * @title: HdyTabView
  * @See_also: #HdyTabBar
  *
- * TBD
+ * #HdyTabView is a container which shows one child at a time. While it provides
+ * keyboard shortcuts for switching between pages, it does not provide a visible
+ * tab bar and relies on external widgets for that, such as #HdyTabBar.
+ *
+ * #HdyTabView maintains a #HdyTabPage object for each page,which holds
+ * additional per-page properties. You can obtain the #HdyTabPage for a page
+ * with hdy_tab_view_get_page(), and as return value for hdy_tab_view_append()
+ * and other functions for adding children.
+ *
+ * #HdyTabView only aims to be useful for dynamic tabs in multi-window
+ * document-based applications, such as web browsers, file managers, text
+ * editors or terminals. It does not aim to replace #GtkNotebook for use cases
+ * such as tabbed dialogs.
+ *
+ * As such, it does not support disabling page reordering or detaching, or
+ * adding children via #GtkBuilder.
+ *
+ * # CSS nodes
+ *
+ * #HdyTabView has a main CSS node with the name tabview.
+ *
+ * It contains the subnode overlay, which contains subnodes stack and widget.
+ * The stack subnode contains the added pages.
  *
  * |[<!-- language="plain" -->
  * tabview
@@ -2697,9 +2719,10 @@ hdy_tab_view_attach_page (HdyTabView *self,
  * @other_view: the tab view to transfer the page to
  * @position: the position to insert the page at, starting at 0
  *
- * Transfers @page from @self to @other_view.
+ * Transfers @page from @self to @other_view. The @page object will be reused.
  *
- * If the page is pinned, the position must be lower
+ * It's a programmer error to try to insert a pinned page after a non-pinned
+ * one, or a non-pinned page before a pinned one.
  *
  * Since: 1.2
  */

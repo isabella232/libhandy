@@ -19,6 +19,13 @@
  * The #HdyTabBar widget is a tab bar that can be used with conjunction with
  * #HdyTabView.
  *
+ * #HdyTabBar can autohide and can optionally contain action widgets on both
+ * sides of the tabs.
+ *
+ * When there's not enough space to show all the tabs, #HdyTabBar will scroll
+ * them. Pinned tabs always stay visible and aren't a part of the scrollable
+ * area.
+ *
  * # CSS nodes
  *
  * #HdyTabBar has a single CSS node with name tabbar.
