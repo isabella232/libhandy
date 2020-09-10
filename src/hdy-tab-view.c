@@ -2712,9 +2712,8 @@ hdy_tab_view_transfer_page (HdyTabView *self,
 
   pinned = hdy_tab_page_get_pinned (page);
 
-  g_return_if_fail (!pinned || position < other_view->n_pinned_pages);
+  g_return_if_fail (!pinned || position <= other_view->n_pinned_pages);
   g_return_if_fail (pinned || position >= other_view->n_pinned_pages);
-  g_return_if_fail (pinned || position < other_view->n_pages);
 
   hdy_tab_view_detach_page (self, page);
   hdy_tab_view_attach_page (other_view, page, position);

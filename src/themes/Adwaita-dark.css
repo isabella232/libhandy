@@ -199,13 +199,9 @@ window.csd.unified:not(.solid-csd):not(.fullscreen) > decoration-overlay { box-s
 window.csd.unified:not(.solid-csd):not(.fullscreen):not(.tiled):not(.tiled-top):not(.tiled-bottom):not(.tiled-left):not(.tiled-right):not(.maximized), window.csd.unified:not(.solid-csd):not(.fullscreen):not(.tiled):not(.tiled-top):not(.tiled-bottom):not(.tiled-left):not(.tiled-right):not(.maximized) > decoration, window.csd.unified:not(.solid-csd):not(.fullscreen):not(.tiled):not(.tiled-top):not(.tiled-bottom):not(.tiled-left):not(.tiled-right):not(.maximized) > decoration-overlay { border-radius: 8px; }
 
 /* FIXME this should be inlined after we finalize the colors */
-tabbar .box { min-height: 38px; background: #161616; border-color: #070707; border-style: solid; }
+tabbar .box { min-height: 38px; background: #161616; border-bottom: 1px solid #070707; }
 
 tabbar .box:backdrop { background-color: #262626; border-color: #202020; }
-
-tabbar.top .box { border-bottom-width: 1px; }
-
-tabbar.bottom .box { border-top-width: 1px; }
 
 tabbar tabbox.pinned:dir(ltr) { padding-right: 1px; box-shadow: inset -1px 0 #070707; }
 

@@ -406,21 +406,12 @@ tabbar {
   .box {
     min-height: 38px;
     background: $tab_bar_bg;
-    border-color: $alt_borders_color;
-    border-style: solid;
+    border-bottom: 1px solid $alt_borders_color;
 
     &:backdrop {
       background-color: $tab_bar_bg_backdrop;
       border-color: $backdrop_borders_color;
     }
-  }
-
-  &.top .box {
-    border-bottom-width: 1px;
-  }
-
-  &.bottom .box {
-    border-top-width: 1px;
   }
 
   tabbox.pinned {

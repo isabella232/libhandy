@@ -12,11 +12,16 @@
 
 /**
  * SECTION:hdy-tab-bar
- * @short_description: TBD
+ * @short_description: A tab bar for #HdyTabView
  * @title: HdyTabBar
  * @See_also: #HdyTabView
  *
- * TBD
+ * The #HdyTabBar widget is a tab bar that can be used with conjunction with
+ * #HdyTabView.
+ *
+ * # CSS nodes
+ *
+ * #HdyKeypad has a single CSS node with name keypad.
  *
  * Since: 1.2
  */
@@ -34,6 +39,7 @@ struct _HdyTabBar
   GtkBin *end_action_bin;
 
   HdyTabView *view;
+  gboolean autohide;
 };
 
 static void hdy_tab_bar_buildable_init (GtkBuildableIface *iface);
@@ -47,6 +53,7 @@ enum {
   PROP_VIEW,
   PROP_START_ACTION_WIDGET,
   PROP_END_ACTION_WIDGET,
+  PROP_AUTOHIDE,
   PROP_TABS_REVEALED,
   LAST_PROP
 };
@@ -73,6 +80,12 @@ update_autohide_cb (HdyTabBar *self)
 
   if (!self->view) {
     set_tabs_revealed (self, FALSE);
+
+    return;
+  }
+
+  if (!self->autohide) {
+    set_tabs_revealed (self, TRUE);
 
     return;
   }
@@ -322,6 +335,10 @@ hdy_tab_bar_get_property (GObject    *object,
     g_value_set_object (value, hdy_tab_bar_get_end_action_widget (self));
     break;
 
+  case PROP_AUTOHIDE:
+    g_value_set_boolean (value, hdy_tab_bar_get_autohide (self));
+    break;
+
   case PROP_TABS_REVEALED:
     g_value_set_boolean (value, hdy_tab_bar_get_tabs_revealed (self));
     break;
@@ -352,6 +369,9 @@ hdy_tab_bar_set_property (GObject      *object,
     hdy_tab_bar_set_end_action_widget (self, g_value_get_object (value));
     break;
 
+  case PROP_AUTOHIDE:
+    hdy_tab_bar_set_autohide (self, g_value_get_boolean (value));
+    break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
   }
@@ -417,12 +437,30 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
+   * HdyTabBar:autohide:
+   *
+   * Whether the tabs automatically hide.
+   *
+   * If set to %TRUE, the tab bar disappears when the associated #HdyTabView
+   * has 0 or 1 tab, no pinned tabs, and no tab is being transferred.
+   *
+   * See #HdyTabBar:tabs-revealed.
+   *
+   * Since: 1.2
+   */
+  props[PROP_AUTOHIDE] =
+    g_param_spec_boolean ("autohide",
+                          _("Autohide"),
+                          _("Whether the tabs automatically hide"),
+                          TRUE,
+                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
+
+  /**
    * HdyTabBar:tabs-revealed:
    *
    * Whether the tabs are currently revealed.
    *
-   * TODO have policies and then we can link to the policy prop here and describe
-   * the specific behavior there
+   * See HdyTabBar:autohide.
    *
    * Since: 1.2
    */
@@ -456,6 +494,8 @@ hdy_tab_bar_init (HdyTabBar *self)
   g_type_ensure (HDY_TYPE_TAB_BOX);
 
   gtk_widget_init_template (GTK_WIDGET (self));
+
+  self->autohide = TRUE;
 
   hdy_tab_box_set_adjustment (self->scroll_box,
                               gtk_scrolled_window_get_hadjustment (self->scrolled_window));
@@ -702,6 +742,56 @@ hdy_tab_bar_set_end_action_widget (HdyTabBar *self,
   gtk_widget_set_visible (GTK_WIDGET (self->end_action_bin), widget != NULL);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_END_ACTION_WIDGET]);
+}
+
+/**
+ * hdy_tab_bar_get_autohide:
+ * @self: a #HdyTabBar
+ *
+ * Gets whether the tabs automatically hide, see hdy_tab_bar_set_autohide().
+ *
+ * Returns: whether the tabs automatically hide
+ *
+ * Since: 1.2
+ */
+gboolean
+hdy_tab_bar_get_autohide (HdyTabBar *self)
+{
+  g_return_val_if_fail (HDY_IS_TAB_BAR (self), FALSE);
+
+  return self->autohide;
+}
+
+/**
+ * hdy_tab_bar_set_autohide:
+ * @self: a #HdyTabBar
+ * @autohide: whether the tabs automatically hide
+ *
+ * Sets whether the tabs automatically hide.
+ *
+ * If @autohide is %TRUE, the tab bar disappears when the associated #HdyTabView
+ * has 0 or 1 tab, no pinned tabs, and no tab is being transferred.
+ *
+ * See #HdyTabBar:tabs-revealed.
+ *
+ * Since: 1.2
+ */
+void
+hdy_tab_bar_set_autohide (HdyTabBar *self,
+                          gboolean   autohide)
+{
+  g_return_if_fail (HDY_IS_TAB_BAR (self));
+
+  autohide = !!autohide;
+
+  if (autohide == self->autohide)
+    return;
+
+  self->autohide = autohide;
+
+  update_autohide_cb (self);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_AUTOHIDE]);
 }
 
 /**

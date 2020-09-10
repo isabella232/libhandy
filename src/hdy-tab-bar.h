@@ -23,11 +23,6 @@ G_BEGIN_DECLS
 HDY_AVAILABLE_IN_ALL
 G_DECLARE_FINAL_TYPE (HdyTabBar, hdy_tab_bar, HDY, TAB_BAR, GtkBin)
 
-typedef enum {
-  HDY_TAB_BAR_POSITION_TOP,
-  HDY_TAB_BAR_POSITION_BOTTOM,
-} HdyTabBarPosition;
-
 HDY_AVAILABLE_IN_ALL
 HdyTabBar *hdy_tab_bar_new (void);
 
@@ -50,10 +45,10 @@ void       hdy_tab_bar_set_end_action_widget (HdyTabBar *self,
                                               GtkWidget *widget);
 
 HDY_AVAILABLE_IN_ALL
-HdyTabBarPosition hdy_tab_bar_get_position (HdyTabBar *self);
+gboolean hdy_tab_bar_get_autohide (HdyTabBar *self);
 HDY_AVAILABLE_IN_ALL
-void              hdy_tab_bar_set_position (HdyTabBar         *self,
-                                            HdyTabBarPosition  position);
+void     hdy_tab_bar_set_autohide (HdyTabBar *self,
+                                   gboolean   autohide);
 
 HDY_AVAILABLE_IN_ALL
 gboolean hdy_tab_bar_get_tabs_revealed (HdyTabBar *self);
