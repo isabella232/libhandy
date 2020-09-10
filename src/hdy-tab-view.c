@@ -2648,7 +2648,7 @@ hdy_tab_view_attach_page (HdyTabView *self,
  * hdy_tab_view_transfer_page:
  * @self: a #HdyTabView
  * @page: a page of @self
- * @other_view:
+ * @other_view: TBD
  * @position: TBD
  *
  * TBD
