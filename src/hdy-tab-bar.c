@@ -21,16 +21,6 @@
  * Since: 1.2
  */
 
-/**
- * HdyTabBarPosition:
- * @HDY_TAB_BAR_POSITION_TOP: TBD
- * @HDY_TAB_BAR_POSITION_BOTTOM: TBD
- *
- * TBD
- *
- * Since: 1.2
- */
-
 struct _HdyTabBar
 {
   GtkBin parent_instance;
@@ -44,7 +34,6 @@ struct _HdyTabBar
   GtkBin *end_action_bin;
 
   HdyTabView *view;
-  HdyTabBarPosition position;
 };
 
 static void hdy_tab_bar_buildable_init (GtkBuildableIface *iface);
@@ -58,7 +47,6 @@ enum {
   PROP_VIEW,
   PROP_START_ACTION_WIDGET,
   PROP_END_ACTION_WIDGET,
-  PROP_POSITION,
   PROP_TABS_REVEALED,
   LAST_PROP
 };
@@ -334,10 +322,6 @@ hdy_tab_bar_get_property (GObject    *object,
     g_value_set_object (value, hdy_tab_bar_get_end_action_widget (self));
     break;
 
-  case PROP_POSITION:
-    g_value_set_enum (value, hdy_tab_bar_get_position (self));
-    break;
-
   case PROP_TABS_REVEALED:
     g_value_set_boolean (value, hdy_tab_bar_get_tabs_revealed (self));
     break;
@@ -368,10 +352,6 @@ hdy_tab_bar_set_property (GObject      *object,
     hdy_tab_bar_set_end_action_widget (self, g_value_get_object (value));
     break;
 
-  case PROP_POSITION:
-    hdy_tab_bar_set_position (self, g_value_get_enum (value));
-    break;
-
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
   }
@@ -397,71 +377,59 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
   /**
    * HdyTabBar:view:
    *
-   * TBD
+   * The #HdyTabView the tab bar controls.
    *
    * Since: 1.2
    */
   props[PROP_VIEW] =
     g_param_spec_object ("view",
                          _("View"),
-                         _("View"),
+                         _("The view the tab bar controls."),
                          HDY_TYPE_TAB_VIEW,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabBar:start-action-widget:
    *
-   * TBD
+   * The widget shown before the tabs.
    *
    * Since: 1.2
    */
   props[PROP_START_ACTION_WIDGET] =
     g_param_spec_object ("start-action-widget",
-                         _("Start Action Widget"),
-                         _("Start Action Widget"),
+                         _("Start action widget"),
+                         _("The widget shown before the tabs"),
                          GTK_TYPE_WIDGET,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
    * HdyTabBar:end-action-widget:
    *
-   * TBD
+   * The widget shown after the tabs.
    *
    * Since: 1.2
    */
   props[PROP_END_ACTION_WIDGET] =
     g_param_spec_object ("end-action-widget",
-                         _("End Action Widget"),
-                         _("End Action Widget"),
+                         _("End action widget"),
+                         _("The widget shown after the tabs"),
                          GTK_TYPE_WIDGET,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
-   * HdyTabBar:position:
-   *
-   * TBD
-   *
-   * Since: 1.2
-   */
-  props[PROP_POSITION] =
-    g_param_spec_enum ("position",
-                       _("Position"),
-                       _("Position"),
-                       HDY_TYPE_TAB_BAR_POSITION,
-                       HDY_TAB_BAR_POSITION_TOP,
-                       G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
-
-  /**
    * HdyTabBar:tabs-revealed:
    *
-   * TBD
+   * Whether the tabs are currently revealed.
+   *
+   * TODO have policies and then we can link to the policy prop here and describe
+   * the specific behavior there
    *
    * Since: 1.2
    */
   props[PROP_TABS_REVEALED] =
     g_param_spec_boolean ("tabs-revealed",
-                          _("Tabs Revealed"),
-                          _("Tabs Revealed"),
+                          _("Tabs revealed"),
+                          _("Whether the tabs are currently revealed"),
                           FALSE,
                           G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
@@ -560,9 +528,9 @@ hdy_tab_bar_new (void)
  * hdy_tab_bar_get_view:
  * @self: a #HdyTabBar
  *
- * TBD
+ * Gets the #HdyTabView @self controls.
  *
- * Returns: (transfer none) (nullable): TBD
+ * Returns: (transfer none) (nullable): the #HdyTabView @self controls
  *
  * Since: 1.2
  */
@@ -577,9 +545,9 @@ hdy_tab_bar_get_view (HdyTabBar *self)
 /**
  * hdy_tab_bar_set_view:
  * @self: a #HdyTabBar
- * @view: (nullable): TBD
+ * @view: (nullable): a #HdyTabView
  *
- * TBD
+ * Sets the #HdyTabView @self controls.
  *
  * Since: 1.2
  */
@@ -636,9 +604,9 @@ hdy_tab_bar_set_view (HdyTabBar  *self,
  * hdy_tab_bar_get_start_action_widget:
  * @self: a #HdyTabBar
  *
- * TBD
+ * Gets the widget shown before the tabs.
  *
- * Returns: (transfer none) (nullable): TBD
+ * Returns: (transfer none) (nullable): the widget shown before the tabs, or %NULL
  *
  * Since: 1.2
  */
@@ -653,9 +621,9 @@ hdy_tab_bar_get_start_action_widget (HdyTabBar *self)
 /**
  * hdy_tab_bar_set_start_action_widget:
  * @self: a #HdyTabBar
- * @widget: (transfer none) (nullable): TBD
+ * @widget: (transfer none) (nullable): the widget to show before the tabs, or %NULL
  *
- * TBD
+ * Sets the widget to show before the tabs.
  *
  * Since: 1.2
  */
@@ -688,9 +656,9 @@ hdy_tab_bar_set_start_action_widget (HdyTabBar *self,
  * hdy_tab_bar_get_end_action_widget:
  * @self: a #HdyTabBar
  *
- * TBD
+ * Gets the widget shown after the tabs.
  *
- * Returns: (transfer none) (nullable): TBD
+ * Returns: (transfer none) (nullable): the widget shown after the tabs, or %NULL
  *
  * Since: 1.2
  */
@@ -705,9 +673,9 @@ hdy_tab_bar_get_end_action_widget (HdyTabBar *self)
 /**
  * hdy_tab_bar_set_end_action_widget:
  * @self: a #HdyTabBar
- * @widget: (transfer none) (nullable): TBD
+ * @widget: (transfer none) (nullable): the widget to show after the tabs, or %NULL
  *
- * TBD
+ * Sets the widget to show before the tabs.
  *
  * Since: 1.2
  */
@@ -737,76 +705,12 @@ hdy_tab_bar_set_end_action_widget (HdyTabBar *self,
 }
 
 /**
- * hdy_tab_bar_get_position:
- * @self: a #HdyTabBar
- *
- * TBD
- *
- * Returns: TBD
- *
- * Since: 1.2
- */
-HdyTabBarPosition
-hdy_tab_bar_get_position (HdyTabBar *self)
-{
-  g_return_val_if_fail (HDY_IS_TAB_BAR (self), 0);
-
-  return self->position;
-}
-
-/**
- * hdy_tab_bar_set_position:
- * @self: a #HdyTabBar
- * @position: TBD
- *
- * TBD
- *
- * Since: 1.2
- */
-void
-hdy_tab_bar_set_position (HdyTabBar         *self,
-                          HdyTabBarPosition  position)
-{
-  GtkStyleContext *context;
-
-  g_return_if_fail (HDY_IS_TAB_BAR (self));
-
-  if (self->position == position)
-    return;
-
-  context = gtk_widget_get_style_context (GTK_WIDGET (self));
-
-  self->position = position;
-
-  switch (position) {
-  case HDY_TAB_BAR_POSITION_TOP:
-    gtk_style_context_add_class (context, "top");
-    gtk_style_context_remove_class (context, "bottom");
-    gtk_revealer_set_transition_type (self->revealer,
-                                      GTK_REVEALER_TRANSITION_TYPE_SLIDE_DOWN);
-    break;
-
-  case HDY_TAB_BAR_POSITION_BOTTOM:
-    gtk_style_context_add_class (context, "bottom");
-    gtk_style_context_remove_class (context, "top");
-    gtk_revealer_set_transition_type (self->revealer,
-                                      GTK_REVEALER_TRANSITION_TYPE_SLIDE_UP);
-    break;
-
-  default:
-    g_assert_not_reached ();
-  }
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_POSITION]);
-}
-
-/**
  * hdy_tab_bar_get_tabs_revealed:
  * @self: a #HdyTabBar
  *
- * TBD
+ * Gets the value of the #HdyTabBar:tabs-revealed property.
  *
- * Returns: TBD
+ * Returns: whether the tabs are current revealed
  *
  * Since: 1.2
  */
