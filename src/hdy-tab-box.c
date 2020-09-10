@@ -1459,6 +1459,7 @@ add_page (HdyTabBox  *self,
   if (!self->pinned)
     position -= hdy_tab_view_get_n_pinned_pages (self->view);
 
+  set_tab_resize_mode (self, TAB_RESIZE_NORMAL);
   force_end_reordering (self);
 
   info = create_tab_info (self, page);
