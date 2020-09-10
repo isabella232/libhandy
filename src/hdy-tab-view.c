@@ -1683,7 +1683,7 @@ hdy_tab_view_get_n_pinned_pages (HdyTabView *self)
  *
  * Whether a tab is being transferred.
  *
- * Gets the value of #HdyTabView::is-transferring-tab property.
+ * Gets the value of #HdyTabView:is-transferring-tab property.
  *
  * Returns: whether a tab is being transferred
  *
