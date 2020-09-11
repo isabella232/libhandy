@@ -255,7 +255,7 @@ hdy_tab_bar_focus (GtkWidget        *widget,
   gboolean is_rtl;
   GtkDirectionType start, end;
 
-  if (!self->view)
+  if (!hdy_tab_bar_get_tabs_revealed (self))
     return GDK_EVENT_PROPAGATE;
 
   if (!gtk_container_get_focus_child (GTK_CONTAINER (self)))
