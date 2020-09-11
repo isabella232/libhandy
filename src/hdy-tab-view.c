@@ -128,8 +128,8 @@ enum {
 static GParamSpec *props[LAST_PROP];
 
 enum {
-  SIGNAL_PAGE_ADDED,
-  SIGNAL_PAGE_REMOVED,
+  SIGNAL_PAGE_ATTACHED,
+  SIGNAL_PAGE_DETACHED,
   SIGNAL_PAGE_REORDERED,
   SIGNAL_CLOSE_PAGE,
   SIGNAL_SETUP_MENU,
@@ -577,7 +577,7 @@ attach_page (HdyTabView *self,
   if (pinned)
     set_n_pinned_pages (self, self->n_pages + 1);
 
-  g_signal_emit (self, signals[SIGNAL_PAGE_ADDED], 0, page, position);
+  g_signal_emit (self, signals[SIGNAL_PAGE_ATTACHED], 0, page, position);
 }
 
 static void
@@ -605,7 +605,7 @@ detach_page (HdyTabView *self,
 
   gtk_container_remove (GTK_CONTAINER (self->stack), child);
 
-  g_signal_emit (self, signals[SIGNAL_PAGE_REMOVED], 0, page, pos);
+  g_signal_emit (self, signals[SIGNAL_PAGE_DETACHED], 0, page, pos);
 
   check_close_window (self);
 
@@ -1007,17 +1007,21 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
   /**
-   * HdyTabView::page-added:
+   * HdyTabView::page-attached:
    * @self: a #HdyTabView
    * @page: a page of @self
-   * @position: TBD
+   * @position: the position of the page, starting from 0
    *
-   * TBD
+   * This signal is emitted when a page has been created or transferred to
+   * @self.
+   *
+   * A typical reason to connect to this signal would be to connect to page
+   * signals for things such as updating window title.
    *
    * Since: 1.2
    */
-  signals[SIGNAL_PAGE_ADDED] =
-    g_signal_new ("page-added",
+  signals[SIGNAL_PAGE_ATTACHED] =
+    g_signal_new ("page-attached",
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   0,
@@ -1027,17 +1031,26 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                   HDY_TYPE_TAB_PAGE, G_TYPE_INT);
 
   /**
-   * HdyTabView::page-removed:
+   * HdyTabView::page-detached:
    * @self: a #HdyTabView
    * @page: a page of @self
-   * @position: TBD
+   * @position: the position of the removed page, starting from 0
    *
-   * TBD
+   * This signal is emitted when a page has been removed or transferred to
+   * another view.
+   *
+   * A typical reason to connect to this signal would be to disconnect signal
+   * handlers connected in the #HdyTabView::page-attached handler.
+   *
+   * It is important not to try and destroy the page child in the handler of
+   * this function as the child might merely be moved to another window; use
+   * child dispose handler for that or do it in sync with your
+   * hdy_tab_view_close_page_finish() calls.
    *
    * Since: 1.2
    */
-  signals[SIGNAL_PAGE_REMOVED] =
-    g_signal_new ("page-removed",
+  signals[SIGNAL_PAGE_DETACHED] =
+    g_signal_new ("page-detached",
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   0,

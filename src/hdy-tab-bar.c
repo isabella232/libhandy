@@ -655,10 +655,10 @@ hdy_tab_bar_set_view (HdyTabBar  *self,
     g_signal_connect_object (self->view, "notify::selected-page",
                              G_CALLBACK (notify_selected_page_cb), self,
                              G_CONNECT_SWAPPED);
-    g_signal_connect_object (self->view, "page-added",
+    g_signal_connect_object (self->view, "page-attached",
                              G_CALLBACK (page_attached_cb), self,
                              G_CONNECT_SWAPPED);
-    g_signal_connect_object (self->view, "page-removed",
+    g_signal_connect_object (self->view, "page-detached",
                              G_CALLBACK (page_detached_cb), self,
                              G_CONNECT_SWAPPED);
     g_signal_connect_object (self->view, "destroy",

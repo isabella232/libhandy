@@ -3326,8 +3326,8 @@ hdy_tab_box_set_view (HdyTabBox  *self,
     for (i = n_pages - 1; i >= 0; i--)
       page_attached_cb (self, hdy_tab_view_get_nth_page (self->view, i), 0);
 
-    g_signal_connect_object (self->view, "page-added", G_CALLBACK (page_attached_cb), self, G_CONNECT_SWAPPED);
-    g_signal_connect_object (self->view, "page-removed", G_CALLBACK (page_detached_cb), self, G_CONNECT_SWAPPED);
+    g_signal_connect_object (self->view, "page-attached", G_CALLBACK (page_attached_cb), self, G_CONNECT_SWAPPED);
+    g_signal_connect_object (self->view, "page-detached", G_CALLBACK (page_detached_cb), self, G_CONNECT_SWAPPED);
     g_signal_connect_object (self->view, "page-reordered", G_CALLBACK (page_reordered_cb), self, G_CONNECT_SWAPPED);
 
     if (!self->pinned)
