@@ -1074,9 +1074,9 @@ reset_reorder_animations (HdyTabBox *self)
 }
 
 static void
-reorder_page (HdyTabBox  *self,
-              HdyTabPage *page,
-              gint        index)
+page_reordered_cb (HdyTabBox  *self,
+                   HdyTabPage *page,
+                   gint        index)
 {
   GList *link;
   gint original_index;
@@ -1342,11 +1342,11 @@ end_dragging (HdyTabBox *self)
       index += hdy_tab_view_get_n_pinned_pages (self->view);
 
     /* We've already reordered the tab here, no need to do it again */
-    g_signal_handlers_block_by_func (self->view, reorder_page, self);
+    g_signal_handlers_block_by_func (self->view, page_reordered_cb, self);
 
     hdy_tab_view_reorder_page (self->view, self->reordered_tab->page, index);
 
-    g_signal_handlers_unblock_by_func (self->view, reorder_page, self);
+    g_signal_handlers_unblock_by_func (self->view, page_reordered_cb, self);
   }
 
   animate_reordering (self, dest_tab);
@@ -1447,9 +1447,9 @@ create_tab_info (HdyTabBox  *self,
 }
 
 static void
-add_page (HdyTabBox  *self,
-          HdyTabPage *page,
-          gint        position)
+page_attached_cb (HdyTabBox  *self,
+                  HdyTabPage *page,
+                  gint        position)
 {
   TabInfo *info;
   GList *l;
@@ -1515,8 +1515,8 @@ close_animation_done_cb (gpointer user_data)
 }
 
 static void
-remove_page (HdyTabBox  *self,
-             HdyTabPage *page)
+page_detached_cb (HdyTabBox  *self,
+                  HdyTabPage *page)
 {
   TabInfo *info;
   GList *page_link;
@@ -1839,11 +1839,11 @@ do_drag_drop (HdyTabBox      *self,
     replace_placeholder (self, page);
     end_dragging (self);
 
-    g_signal_handlers_block_by_func (self->view, add_page, self);
+    g_signal_handlers_block_by_func (self->view, page_attached_cb, self);
 
     hdy_tab_view_attach_page (self->view, page, self->reorder_index + offset);
 
-    g_signal_handlers_unblock_by_func (self->view, add_page, self);
+    g_signal_handlers_unblock_by_func (self->view, page_attached_cb, self);
   } else {
     hdy_tab_view_attach_page (self->view, page, self->reorder_index + offset);
   }
@@ -3304,9 +3304,9 @@ hdy_tab_box_set_view (HdyTabBox  *self,
   if (self->view) {
     force_end_reordering (self);
 
-    g_signal_handlers_disconnect_by_func (self->view, add_page, self);
-    g_signal_handlers_disconnect_by_func (self->view, remove_page, self);
-    g_signal_handlers_disconnect_by_func (self->view, reorder_page, self);
+    g_signal_handlers_disconnect_by_func (self->view, page_attached_cb, self);
+    g_signal_handlers_disconnect_by_func (self->view, page_detached_cb, self);
+    g_signal_handlers_disconnect_by_func (self->view, page_reordered_cb, self);
 
     if (!self->pinned)
       g_signal_handlers_disconnect_by_func (self->view, view_drag_drop_cb, self);
@@ -3324,11 +3324,11 @@ hdy_tab_box_set_view (HdyTabBox  *self,
     int i, n_pages = hdy_tab_view_get_n_pages (self->view);
 
     for (i = n_pages - 1; i >= 0; i--)
-      add_page (self, hdy_tab_view_get_nth_page (self->view, i), 0);
+      page_attached_cb (self, hdy_tab_view_get_nth_page (self->view, i), 0);
 
-    g_signal_connect_object (self->view, "page-added", G_CALLBACK (add_page), self, G_CONNECT_SWAPPED);
-    g_signal_connect_object (self->view, "page-removed", G_CALLBACK (remove_page), self, G_CONNECT_SWAPPED);
-    g_signal_connect_object (self->view, "page-reordered", G_CALLBACK (reorder_page), self, G_CONNECT_SWAPPED);
+    g_signal_connect_object (self->view, "page-added", G_CALLBACK (page_attached_cb), self, G_CONNECT_SWAPPED);
+    g_signal_connect_object (self->view, "page-removed", G_CALLBACK (page_detached_cb), self, G_CONNECT_SWAPPED);
+    g_signal_connect_object (self->view, "page-reordered", G_CALLBACK (page_reordered_cb), self, G_CONNECT_SWAPPED);
 
     if (!self->pinned)
       g_signal_connect_object (self->view, "drag-drop", G_CALLBACK (view_drag_drop_cb), self, G_CONNECT_SWAPPED);
@@ -3370,18 +3370,18 @@ hdy_tab_box_set_block_scrolling (HdyTabBox *self,
 }
 
 void
-hdy_tab_box_add_page (HdyTabBox  *self,
-                      HdyTabPage *page,
-                      gint        position)
+hdy_tab_box_attach_page (HdyTabBox  *self,
+                         HdyTabPage *page,
+                         gint        position)
 {
-  add_page (self, page, position);
+  page_attached_cb (self, page, position);
 }
 
 void
-hdy_tab_box_remove_page (HdyTabBox  *self,
+hdy_tab_box_detach_page (HdyTabBox  *self,
                          HdyTabPage *page)
 {
-  remove_page (self, page);
+  page_detached_cb (self, page);
 }
 
 void

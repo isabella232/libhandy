@@ -160,17 +160,17 @@ notify_pinned_cb (HdyTabPage *page,
 
   should_focus = hdy_tab_box_is_page_focused (from, page);
 
-  hdy_tab_box_remove_page (from, page);
-  hdy_tab_box_add_page (to, page, hdy_tab_view_get_n_pinned_pages (self->view));
+  hdy_tab_box_detach_page (from, page);
+  hdy_tab_box_attach_page (to, page, hdy_tab_view_get_n_pinned_pages (self->view));
 
   if (should_focus)
     hdy_tab_box_try_focus_selected_tab (to);
 }
 
 static void
-page_added_cb (HdyTabBar  *self,
-               HdyTabPage *page,
-               gint        position)
+page_attached_cb (HdyTabBar  *self,
+                  HdyTabPage *page,
+                  gint        position)
 {
   g_signal_connect_object (page, "notify::pinned",
                            G_CALLBACK (notify_pinned_cb), self,
@@ -178,9 +178,9 @@ page_added_cb (HdyTabBar  *self,
 }
 
 static void
-page_removed_cb (HdyTabBox  *self,
-                 HdyTabPage *page,
-                 gint        position)
+page_detached_cb (HdyTabBar  *self,
+                  HdyTabPage *page,
+                  gint        position)
 {
   g_signal_handlers_disconnect_by_func (page, notify_pinned_cb, self);
 }
@@ -624,13 +624,25 @@ hdy_tab_bar_set_view (HdyTabBar  *self,
     return;
 
   if (self->view) {
+    gint i, n;
+
     g_signal_handlers_disconnect_by_func (self->view, update_autohide_cb, self);
     g_signal_handlers_disconnect_by_func (self->view, notify_selected_page_cb, self);
+    g_signal_handlers_disconnect_by_func (self->view, page_attached_cb, self);
+    g_signal_handlers_disconnect_by_func (self->view, page_detached_cb, self);
+    g_signal_handlers_disconnect_by_func (self->view, view_destroy_cb, self);
+
+    n = hdy_tab_view_get_n_pages (self->view);
+
+    for (i = 0; i < n; i++)
+      page_detached_cb (self, hdy_tab_view_get_nth_page (self->view, i), i);
   }
 
   g_set_object (&self->view, view);
 
   if (self->view) {
+    gint i, n;
+
     g_signal_connect_object (self->view, "notify::is-transferring-tab",
                              G_CALLBACK (update_autohide_cb), self,
                              G_CONNECT_SWAPPED);
@@ -644,14 +656,19 @@ hdy_tab_bar_set_view (HdyTabBar  *self,
                              G_CALLBACK (notify_selected_page_cb), self,
                              G_CONNECT_SWAPPED);
     g_signal_connect_object (self->view, "page-added",
-                             G_CALLBACK (page_added_cb), self,
+                             G_CALLBACK (page_attached_cb), self,
                              G_CONNECT_SWAPPED);
     g_signal_connect_object (self->view, "page-removed",
-                             G_CALLBACK (page_removed_cb), self,
+                             G_CALLBACK (page_detached_cb), self,
                              G_CONNECT_SWAPPED);
     g_signal_connect_object (self->view, "destroy",
                              G_CALLBACK (view_destroy_cb), self,
                              G_CONNECT_SWAPPED);
+
+    n = hdy_tab_view_get_n_pages (self->view);
+
+    for (i = 0; i < n; i++)
+      page_attached_cb (self, hdy_tab_view_get_nth_page (self->view, i), i);
   }
 
   hdy_tab_box_set_view (self->pinned_box, view);

@@ -26,10 +26,10 @@ void hdy_tab_box_set_adjustment (HdyTabBox     *self,
 void hdy_tab_box_set_block_scrolling (HdyTabBox *self,
                                       gboolean   block_scrolling);
 
-void hdy_tab_box_add_page (HdyTabBox  *self,
-                           HdyTabPage *page,
-                           gint        position);
-void hdy_tab_box_remove_page (HdyTabBox  *self,
+void hdy_tab_box_attach_page (HdyTabBox  *self,
+                              HdyTabPage *page,
+                              gint        position);
+void hdy_tab_box_detach_page (HdyTabBox  *self,
                               HdyTabPage *page);
 void hdy_tab_box_select_page (HdyTabBox  *self,
                               HdyTabPage *page);
