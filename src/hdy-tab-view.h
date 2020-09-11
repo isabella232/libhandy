@@ -116,12 +116,6 @@ void        hdy_tab_view_set_menu_model (HdyTabView *self,
                                          GMenuModel *menu_model);
 
 HDY_AVAILABLE_IN_ALL
-GSList *hdy_tab_view_get_group  (HdyTabView *self);
-HDY_AVAILABLE_IN_ALL
-void    hdy_tab_view_set_group  (HdyTabView *self,
-                                 GSList     *group);
-
-HDY_AVAILABLE_IN_ALL
 void hdy_tab_view_set_page_pinned (HdyTabView *self,
                                    HdyTabPage *page,
                                    gboolean    pinned);

@@ -9,7 +9,7 @@
 
 #include "hdy-tab-view-private.h"
 
-// FIXME replace with groups
+/* FIXME replace with groups */
 static GSList *tab_view_list;
 
 static const GtkTargetEntry dst_targets [] = {
@@ -107,8 +107,7 @@ struct _HdyTabView
   GIcon *default_icon;
   GMenuModel *menu_model;
 
-  GSList *group;
-  gboolean is_transferring_tab;
+  gint tab_transfer_count;
 };
 
 G_DEFINE_TYPE (HdyTabView, hdy_tab_view, GTK_TYPE_BIN)
@@ -121,7 +120,6 @@ enum {
   PROP_SELECTED_PAGE,
   PROP_DEFAULT_ICON,
   PROP_MENU_MODEL,
-  PROP_GROUP,
   LAST_PROP
 };
 
@@ -492,29 +490,32 @@ object_handled_accumulator (GSignalInvocationHint *ihint,
 }
 
 static void
-set_is_transferring_tab (HdyTabView *self,
-                         gboolean    is_transferring_tab)
-{
-  if (is_transferring_tab == self->is_transferring_tab)
-    return;
-
-  self->is_transferring_tab = is_transferring_tab;
-
-  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IS_TRANSFERRING_TAB]);
-}
-
-static void
-set_is_transferring_tab_for_group (HdyTabView *self,
-                                   gboolean    is_transferring_tab)
+begin_transfer_for_group (HdyTabView *self)
 {
   GSList *l;
-
-  g_return_if_fail (HDY_IS_TAB_VIEW (self));
 
   for (l = tab_view_list; l; l = l->next) {
     HdyTabView *view = l->data;
 
-    set_is_transferring_tab (view, is_transferring_tab);
+    view->tab_transfer_count++;
+
+    if (view->tab_transfer_count == 1)
+      g_object_notify_by_pspec (G_OBJECT (view), props[PROP_IS_TRANSFERRING_TAB]);
+  }
+}
+
+static void
+end_transfer_for_group (HdyTabView *self)
+{
+  GSList *l;
+
+  for (l = tab_view_list; l; l = l->next) {
+    HdyTabView *view = l->data;
+
+    view->tab_transfer_count--;
+
+    if (view->tab_transfer_count == 0)
+      g_object_notify_by_pspec (G_OBJECT (view), props[PROP_IS_TRANSFERRING_TAB]);
   }
 }
 
@@ -631,20 +632,6 @@ insert_page (HdyTabView *self,
   g_object_unref (page);
 
   return page;
-}
-
-static void
-set_group_from_view (HdyTabView *self,
-                     HdyTabView *other_view)
-{
-  GSList *slist;
-
-  if (other_view)
-    slist = hdy_tab_view_get_group (other_view);
-  else
-    slist = NULL;
-
-  hdy_tab_view_set_group (self, slist);
 }
 
 static void
@@ -771,16 +758,6 @@ hdy_tab_view_dispose (GObject *object)
   HdyTabView *self = HDY_TAB_VIEW (object);
   GSList *l;
 
-  self->group = g_slist_remove (self->group, self);
-
-  for (l = self->group; l; l = l->next) {
-    HdyTabView *view = l->data;
-
-    view->group = self->group;
-  }
-
-  self->group = NULL;
-
   if (self->pages) {
     while (self->n_pages) {
       HdyTabPage *page = hdy_tab_view_get_nth_page (self, 0);
@@ -866,10 +843,6 @@ hdy_tab_view_set_property (GObject      *object,
     hdy_tab_view_set_menu_model (self, g_value_get_object (value));
     break;
 
-  case PROP_GROUP:
-    set_group_from_view (self, g_value_get_object (value));
-    break;
-
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
   }
@@ -923,7 +896,7 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
    * Whether a tab is being transferred.
    *
    * This property will be set to %TRUE when a drag-n-drop tab transfer starts
-   * on any #HdyTabView in the same group, and to %FALSE after it ends.
+   * on any #HdyTabView, and to %FALSE after it ends.
    *
    * During the transfer, children cannot receive pointer input and a tab can
    * be safely dropped on the tab view.
@@ -989,20 +962,6 @@ hdy_tab_view_class_init (HdyTabViewClass *klass)
                          _("Tab context menu model"),
                          G_TYPE_MENU_MODEL,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
-
-  /**
-   * HdyTabView:group:
-   *
-   * TBD this API doesn't work, replace it something that does work
-   *
-   * Since: 1.2
-   */
-  props[PROP_GROUP] =
-    g_param_spec_object ("group",
-                         _("Group"),
-                         _("Group"),
-                         HDY_TYPE_TAB_VIEW,
-                         G_PARAM_WRITABLE);
 
   g_object_class_install_properties (object_class, LAST_PROP, props);
 
@@ -1243,7 +1202,6 @@ hdy_tab_view_init (HdyTabView *self)
   GtkWidget *overlay, *drag_shield;
 
   self->pages = g_list_store_new (HDY_TYPE_TAB_PAGE);
-  self->group = g_slist_prepend (NULL, self);
   self->default_icon = G_ICON (g_themed_icon_new ("hdy-tab-icon-missing-symbolic"));
 
   overlay = gtk_overlay_new ();
@@ -1734,7 +1692,7 @@ hdy_tab_view_get_is_transferring_tab (HdyTabView *self)
 {
   g_return_val_if_fail (HDY_IS_TAB_VIEW (self), FALSE);
 
-  return self->is_transferring_tab;
+  return self->tab_transfer_count > 0;
 }
 
 /**
@@ -1973,7 +1931,7 @@ hdy_tab_view_get_default_icon (HdyTabView *self)
  * loading, doesn't have icon and secondary icon. Default icon is never used
  * for tabs that aren't pinned.
  *
- * TODO mention the default value
+ * By default, 'hdy-tab-icon-missing-symbolic' icon is used.
  *
  * Since: 1.2
  */
@@ -2036,40 +1994,6 @@ hdy_tab_view_set_menu_model (HdyTabView *self,
   g_set_object (&self->menu_model, menu_model);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MENU_MODEL]);
-}
-
-/**
- * hdy_tab_view_get_group:
- * @self: a #HdyTabView
- *
- * TBD doesn't work
- *
- * Returns: (element-type HdyTabView) (nullable) (transfer none): TBD
- *
- * Since: 1.2
- */
-GSList *
-hdy_tab_view_get_group (HdyTabView *self)
-{
-  g_return_val_if_fail (HDY_IS_TAB_VIEW (self), NULL);
-
-  return tab_view_list; //self->group;
-}
-
-/**
- * hdy_tab_view_set_group:
- * @self: a #HdyTabView
- * @group: (element-type HdyTabView) (nullable): TBD
- *
- * TBD doesn't work
- *
- * Since: 1.2
- */
-void
-hdy_tab_view_set_group (HdyTabView *self,
-                        GSList     *group)
-{
-  g_return_if_fail (HDY_IS_TAB_VIEW (self));
 }
 
 /**
@@ -2698,7 +2622,7 @@ hdy_tab_view_detach_page (HdyTabView *self,
 
   g_object_ref (page);
 
-  set_is_transferring_tab_for_group (self, TRUE);
+  begin_transfer_for_group (self);
 
   detach_page (self, page);
 }
@@ -2717,10 +2641,7 @@ hdy_tab_view_attach_page (HdyTabView *self,
 
   hdy_tab_view_set_selected_page (self, page);
 
-  /* FIXME: In theory it's possible to have multiple detached pages,
-   * should this be a count instead?
-   */
-  set_is_transferring_tab_for_group (self, FALSE);
+  end_transfer_for_group (self);
 
   g_object_unref (page);
 }

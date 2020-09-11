@@ -316,7 +316,6 @@ libhandy-1.so.0 libhandy-1-0 #MINVER#
  hdy_tab_view_close_pages_after@LIBHANDY_1_0 1.0.0
  hdy_tab_view_close_pages_before@LIBHANDY_1_0 1.0.0
  hdy_tab_view_get_default_icon@LIBHANDY_1_0 1.0.0
- hdy_tab_view_get_group@LIBHANDY_1_0 1.0.0
  hdy_tab_view_get_is_transferring_tab@LIBHANDY_1_0 1.0.0
  hdy_tab_view_get_menu_model@LIBHANDY_1_0 1.0.0
  hdy_tab_view_get_n_pages@LIBHANDY_1_0 1.0.0
@@ -342,7 +341,6 @@ libhandy-1.so.0 libhandy-1-0 #MINVER#
  hdy_tab_view_select_next_page@LIBHANDY_1_0 1.0.0
  hdy_tab_view_select_previous_page@LIBHANDY_1_0 1.0.0
  hdy_tab_view_set_default_icon@LIBHANDY_1_0 1.0.0
- hdy_tab_view_set_group@LIBHANDY_1_0 1.0.0
  hdy_tab_view_set_menu_model@LIBHANDY_1_0 1.0.0
  hdy_tab_view_set_page_pinned@LIBHANDY_1_0 1.0.0
  hdy_tab_view_set_selected_page@LIBHANDY_1_0 1.0.0

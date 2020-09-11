@@ -1899,9 +1899,8 @@ static gboolean
 is_view_in_the_same_group (HdyTabBox  *self,
                            HdyTabView *other_view)
 {
-  GSList *group = hdy_tab_view_get_group (self->view);
-
-  return g_slist_index (group, other_view) >= 0;
+  /* TODO when we have groups, this should do the actual check */
+  return TRUE;
 }
 
 static gboolean
