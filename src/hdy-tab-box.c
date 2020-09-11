@@ -1531,7 +1531,7 @@ page_detached_cb (HdyTabBox  *self,
 
   force_end_reordering (self);
 
-  if (self->hovering) {
+  if (self->hovering && !self->pinned) {
     gboolean is_last = TRUE;
 
     while (page_link) {
