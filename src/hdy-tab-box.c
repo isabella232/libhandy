@@ -1661,7 +1661,21 @@ insert_placeholder (HdyTabBox  *self,
     info = create_tab_info (self, page);
 
     info->reorder_ignore_bounds = TRUE;
-    self->placeholder_scroll_offset = hdy_tab_get_child_min_width (info->tab) / 2;
+
+    if (self->adjustment) {
+      gdouble lower, upper, page_size;
+
+      g_object_get (self->adjustment,
+                    "lower", &lower,
+                    "upper", &upper,
+                    "page-size", &page_size,
+                    NULL);
+
+      if (upper - lower > page_size)
+        self->placeholder_scroll_offset = hdy_tab_get_child_min_width (info->tab) / 2;
+      else
+        self->placeholder_scroll_offset = 0;
+    }
 
     index = calculate_placeholder_index (self, pos + self->placeholder_scroll_offset);
 
