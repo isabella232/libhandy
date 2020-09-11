@@ -98,6 +98,8 @@ tab_new (GSimpleAction *action,
 
   hdy_tab_view_set_selected_page (self->view, page);
 
+  gtk_widget_grab_focus (content);
+
   next_page++;
 }
 
