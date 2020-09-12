@@ -2701,3 +2701,15 @@ hdy_tab_view_get_pages (HdyTabView *self)
 
   return G_LIST_MODEL (self->pages);
 }
+
+HdyTabView *
+hdy_tab_view_create_window (HdyTabView *self)
+{
+  HdyTabView *new_view;
+
+  g_signal_emit (self, signals[SIGNAL_CREATE_WINDOW], 0, &new_view);
+
+  new_view->tab_transfer_count = self->tab_transfer_count;
+
+  return new_view;
+}

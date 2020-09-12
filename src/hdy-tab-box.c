@@ -151,6 +151,8 @@ struct _HdyTabBox
   TabInfo *drop_target_tab;
   guint drop_switch_timeout_id;
   guint reset_drop_target_tab_id;
+  gboolean can_accept_drop;
+  int drop_target_x;
 
   HdyAnimation *scroll_animation;
   gboolean scroll_animation_done;
@@ -714,6 +716,46 @@ get_scroll_animation_value (HdyTabBox *self)
   return round (hdy_lerp (self->scroll_animation_from, to, value));
 }
 
+static gboolean
+drop_switch_timeout_cb (HdyTabBox *self)
+{
+  self->drop_switch_timeout_id = 0;
+  hdy_tab_view_set_selected_page (self->view,
+                                  self->drop_target_tab->page);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+set_drop_target_tab (HdyTabBox *self,
+                     TabInfo   *info,
+                     gboolean   highlight)
+{
+  if (self->drop_target_tab == info)
+    return;
+
+  if (self->drop_target_tab) {
+    g_clear_handle_id (&self->drop_switch_timeout_id, g_source_remove);
+
+    gtk_drag_unhighlight (GTK_WIDGET (self->drop_target_tab->tab));
+    hdy_tab_set_hovering (self->drop_target_tab->tab, FALSE);
+  }
+
+  self->drop_target_tab = info;
+
+  if (self->drop_target_tab) {
+    hdy_tab_set_hovering (info->tab, TRUE);
+
+    if (highlight)
+      gtk_drag_highlight (GTK_WIDGET (info->tab));
+
+    self->drop_switch_timeout_id =
+      g_timeout_add (DROP_SWITCH_TIMEOUT,
+                     (GSourceFunc) drop_switch_timeout_cb,
+                     self);
+  }
+}
+
 static void
 adjustment_value_changed_cb (HdyTabBox *self)
 {
@@ -723,6 +765,11 @@ adjustment_value_changed_cb (HdyTabBox *self)
 
   update_hover (self);
   update_needs_attention (self);
+
+  if (self->drop_target_tab) {
+    self->drop_target_x += (value - self->adjustment_prev_value);
+    set_drop_target_tab (self, find_tab_info_at (self, self->drop_target_x), self->can_accept_drop);
+  }
 
   self->adjustment_prev_value = value;
 
@@ -1221,6 +1268,7 @@ drag_autoscroll_cb (GtkWidget     *widget,
   gdouble x, delta_ms, start_threshold, end_threshold, autoscroll_factor;
   gint64 time;
   gint offset = 0;
+  gint tab_width = 0;
 
   g_object_get (self->adjustment,
                 "value", &value,
@@ -1229,15 +1277,23 @@ drag_autoscroll_cb (GtkWidget     *widget,
                 "page-size", &page_size,
                 NULL);
 
-  x = CLAMP ((gdouble) self->reorder_x,
+  if (self->reordered_tab) {
+    tab_width = self->reordered_tab->width;
+    x = (gdouble) self->reorder_x;
+  } else {
+    tab_width = self->drop_target_tab->width;
+    x = (gdouble) self->drop_target_x - tab_width / 2;
+  }
+
+  x = CLAMP (x,
              lower + AUTOSCROLL_AREA_WIDTH,
-             upper - self->reordered_tab->width - AUTOSCROLL_AREA_WIDTH);
+             upper - tab_width - AUTOSCROLL_AREA_WIDTH);
 
   time = gdk_frame_clock_get_frame_time (frame_clock);
   delta_ms = (time - self->drag_autoscroll_prev_time) / 1000.0;
 
   start_threshold = value + AUTOSCROLL_AREA_WIDTH;
-  end_threshold = value + page_size - self->reordered_tab->width - AUTOSCROLL_AREA_WIDTH;
+  end_threshold = value + page_size - tab_width - AUTOSCROLL_AREA_WIDTH;
   autoscroll_factor = 0;
 
   if (x < start_threshold)
@@ -1265,6 +1321,36 @@ drag_autoscroll_cb (GtkWidget     *widget,
 }
 
 static void
+start_autoscroll (HdyTabBox *self)
+{
+  GdkFrameClock *frame_clock;
+
+  if (!self->adjustment)
+    return;
+
+  if (self->drag_autoscroll_cb_id)
+    return;
+
+  frame_clock = gtk_widget_get_frame_clock (GTK_WIDGET (self));
+
+  self->drag_autoscroll_prev_time = gdk_frame_clock_get_frame_time (frame_clock);
+  self->drag_autoscroll_cb_id =
+    gtk_widget_add_tick_callback (GTK_WIDGET (self),
+                                  (GtkTickCallback) drag_autoscroll_cb,
+                                  self, NULL);
+}
+
+static void
+end_autoscroll (HdyTabBox *self)
+{
+  if (self->drag_autoscroll_cb_id) {
+    gtk_widget_remove_tick_callback (GTK_WIDGET (self),
+                                     self->drag_autoscroll_cb_id);
+    self->drag_autoscroll_cb_id = 0;
+  }
+}
+
+static void
 start_dragging (HdyTabBox *self,
                 GdkEvent  *event,
                 TabInfo   *info)
@@ -1288,16 +1374,7 @@ start_dragging (HdyTabBox *self,
   } else
     force_end_reordering (self);
 
-  if (self->adjustment) {
-    GdkFrameClock *frame_clock = gtk_widget_get_frame_clock (GTK_WIDGET (self));
-
-    self->drag_autoscroll_prev_time = gdk_frame_clock_get_frame_time (frame_clock);
-    self->drag_autoscroll_cb_id =
-      gtk_widget_add_tick_callback (GTK_WIDGET (self),
-                                    (GtkTickCallback) drag_autoscroll_cb,
-                                    self, NULL);
-  }
-
+  start_autoscroll (self);
   self->dragging = TRUE;
 
   if (!self->continue_reorder)
@@ -1328,11 +1405,7 @@ end_dragging (HdyTabBox *self)
 
   self->dragging = FALSE;
 
-  if (self->drag_autoscroll_cb_id) {
-    gtk_widget_remove_tick_callback (GTK_WIDGET (self),
-                                     self->drag_autoscroll_cb_id);
-    self->drag_autoscroll_cb_id = 0;
-  }
+  end_autoscroll (self);
 
   dest_tab = g_list_nth_data (self->tabs, self->reorder_index);
 
@@ -1891,7 +1964,7 @@ detach_into_new_window (HdyTabBox      *self,
 
   page = source_tab_box->detached_page;
 
-  g_signal_emit_by_name (source_tab_box->view, "create-window", &new_view);
+  new_view = hdy_tab_view_create_window (source_tab_box->view);
 
   if (!HDY_IS_TAB_VIEW (new_view))
     g_error ("Cannot detach into new window");
@@ -2840,46 +2913,6 @@ hdy_tab_box_drag_end (GtkWidget      *widget,
 }
 
 static gboolean
-drop_switch_timeout_cb (HdyTabBox *self)
-{
-  self->drop_switch_timeout_id = 0;
-  hdy_tab_view_set_selected_page (self->view,
-                                  self->drop_target_tab->page);
-
-  return G_SOURCE_REMOVE;
-}
-
-static void
-set_drop_target_tab (HdyTabBox *self,
-                     TabInfo   *info,
-                     gboolean   highlight)
-{
-  if (self->drop_target_tab == info)
-    return;
-
-  if (self->drop_target_tab) {
-    g_clear_handle_id (&self->drop_switch_timeout_id, g_source_remove);
-
-    gtk_drag_unhighlight (GTK_WIDGET (self->drop_target_tab->tab));
-    hdy_tab_set_hovering (self->drop_target_tab->tab, FALSE);
-  }
-
-  self->drop_target_tab = info;
-
-  if (self->drop_target_tab) {
-    hdy_tab_set_hovering (info->tab, TRUE);
-
-    if (highlight)
-      gtk_drag_highlight (GTK_WIDGET (info->tab));
-
-    self->drop_switch_timeout_id =
-      g_timeout_add (DROP_SWITCH_TIMEOUT,
-                     (GSourceFunc) drop_switch_timeout_cb,
-                     self);
-  }
-}
-
-static gboolean
 hdy_tab_box_drag_motion (GtkWidget      *widget,
                          GdkDragContext *context,
                          gint            x,
@@ -2897,7 +2930,11 @@ hdy_tab_box_drag_motion (GtkWidget      *widget,
   if (target != tab_target) {
     GdkAtom none_target = gdk_atom_intern_static_string ("NONE");
 
-    set_drop_target_tab (self, find_tab_info_at (self, x), target != none_target);
+    self->drop_target_x = x;
+    self->can_accept_drop = target != none_target;
+    set_drop_target_tab (self, find_tab_info_at (self, x), self->can_accept_drop);
+
+    start_autoscroll (self);
 
     return GDK_EVENT_STOP;
   }
@@ -2974,6 +3011,8 @@ hdy_tab_box_drag_leave (GtkWidget      *widget,
     if (!self->reset_drop_target_tab_id)
       self->reset_drop_target_tab_id =
         g_idle_add ((GSourceFunc) reset_drop_target_tab_cb, self);
+
+    end_autoscroll (self);
 
     return;
   }

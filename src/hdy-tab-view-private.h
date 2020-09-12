@@ -20,4 +20,6 @@ void hdy_tab_view_attach_page   (HdyTabView *self,
                                  HdyTabPage *page,
                                  gint        position);
 
+HdyTabView *hdy_tab_view_create_window (HdyTabView *self);
+
 G_END_DECLS
