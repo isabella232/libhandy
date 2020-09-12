@@ -18,6 +18,7 @@
 /* Border collapsing without glitches */
 #define OVERLAP 1
 #define DND_THRESHOLD_MULTIPLIER 4
+#define DROP_SWITCH_TIMEOUT 500
 
 #define AUTOSCROLL_AREA_WIDTH 65
 #define AUTOSCROLL_SPEED 2.5
@@ -147,6 +148,10 @@ struct _HdyTabBox
   gboolean should_detach_into_new_window;
   GtkTargetList *source_targets;
 
+  TabInfo *drop_target_tab;
+  guint drop_switch_timeout_id;
+  guint reset_drop_target_tab_id;
+
   HdyAnimation *scroll_animation;
   gboolean scroll_animation_done;
   gdouble scroll_animation_from;
@@ -173,6 +178,7 @@ static GParamSpec *props[LAST_PROP];
 
 enum {
   SIGNAL_STOP_KINETIC_SCROLLING,
+  SIGNAL_EXTRA_DRAG_DATA_RECEIVED,
   SIGNAL_ACTIVATE_TAB,
   SIGNAL_FOCUS_TAB,
   SIGNAL_REORDER_TAB,
@@ -2834,6 +2840,41 @@ hdy_tab_box_drag_end (GtkWidget      *widget,
 }
 
 static gboolean
+drop_switch_timeout_cb (HdyTabBox *self)
+{
+  self->drop_switch_timeout_id = 0;
+  hdy_tab_view_set_selected_page (self->view,
+                                  self->drop_target_tab->page);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+set_drop_target_tab (HdyTabBox *self,
+                     TabInfo   *info)
+{
+  if (self->drop_target_tab == info)
+    return;
+
+  if (self->drop_target_tab) {
+    g_clear_handle_id (&self->drop_switch_timeout_id, g_source_remove);
+
+    gtk_drag_unhighlight (GTK_WIDGET (self->drop_target_tab->tab));
+  }
+
+  self->drop_target_tab = info;
+
+  if (self->drop_target_tab) {
+    gtk_drag_highlight (GTK_WIDGET (info->tab));
+
+    self->drop_switch_timeout_id =
+      g_timeout_add (DROP_SWITCH_TIMEOUT,
+                     (GSourceFunc) drop_switch_timeout_cb,
+                     self);
+  }
+}
+
+static gboolean
 hdy_tab_box_drag_motion (GtkWidget      *widget,
                          GdkDragContext *context,
                          gint            x,
@@ -2845,13 +2886,16 @@ hdy_tab_box_drag_motion (GtkWidget      *widget,
   GdkAtom target, tab_target;
   gdouble center, display_width;
 
-  if (self->pinned)
-    return GDK_EVENT_PROPAGATE;
-
   target = gtk_drag_dest_find_target (GTK_WIDGET (self), context, NULL);
   tab_target = gdk_atom_intern_static_string ("HDY_TAB");
 
-  if (target != tab_target)
+  if (target != tab_target) {
+    set_drop_target_tab (self, find_tab_info_at (self, x));
+
+    return GDK_EVENT_STOP;
+  }
+
+  if (self->pinned)
     return GDK_EVENT_PROPAGATE;
 
   source_tab_box = get_source_tab_box (context);
@@ -2898,6 +2942,15 @@ hdy_tab_box_drag_motion (GtkWidget      *widget,
   return GDK_EVENT_PROPAGATE;
 }
 
+static gboolean
+reset_drop_target_tab_cb (HdyTabBox *self)
+{
+  self->reset_drop_target_tab_id = 0;
+  set_drop_target_tab (self, NULL);
+
+  return G_SOURCE_REMOVE;
+}
+
 static void
 hdy_tab_box_drag_leave (GtkWidget      *widget,
                         GdkDragContext *context,
@@ -2906,6 +2959,16 @@ hdy_tab_box_drag_leave (GtkWidget      *widget,
   HdyTabBox *self = HDY_TAB_BOX (widget);
   HdyTabBox *source_tab_box;
   GdkAtom target, tab_target;
+
+  target = gtk_drag_dest_find_target (GTK_WIDGET (self), context, NULL);
+  tab_target = gdk_atom_intern_static_string ("HDY_TAB");
+
+  if (target != tab_target) {
+    self->reset_drop_target_tab_id =
+      g_idle_add ((GSourceFunc) reset_drop_target_tab_cb, self);
+
+    return;
+  }
 
   if (self->pinned)
     return;
@@ -2916,12 +2979,6 @@ hdy_tab_box_drag_leave (GtkWidget      *widget,
     return;
 
   if (!self->view || !is_view_in_the_same_group (self, source_tab_box->view))
-    return;
-
-  target = gtk_drag_dest_find_target (GTK_WIDGET (self), context, NULL);
-  tab_target = gdk_atom_intern_static_string ("HDY_TAB");
-
-  if (target != tab_target)
     return;
 
   self->can_remove_placeholder = TRUE;
@@ -2941,6 +2998,18 @@ hdy_tab_box_drag_drop (GtkWidget      *widget,
 {
   HdyTabBox *self = HDY_TAB_BOX (widget);
   HdyTabBox *source_tab_box;
+  GdkAtom target, tab_target;
+
+  target = gtk_drag_dest_find_target (GTK_WIDGET (self), context, NULL);
+  tab_target = gdk_atom_intern_static_string ("HDY_TAB");
+
+  if (target != tab_target) {
+    g_clear_handle_id (&self->reset_drop_target_tab_id, g_source_remove);
+
+    gtk_drag_get_data (widget, context, target, time);
+
+    return GDK_EVENT_STOP;
+  }
 
   if (self->pinned)
     return GDK_EVENT_PROPAGATE;
@@ -3000,6 +3069,24 @@ hdy_tab_box_drag_data_get (GtkWidget        *widget,
 }
 
 static void
+hdy_tab_box_drag_data_received (GtkWidget        *widget,
+                                GdkDragContext   *context,
+                                int               x,
+                                int               y,
+                                GtkSelectionData *selection_data,
+                                guint             info,
+                                guint             time)
+{
+  HdyTabBox *self = HDY_TAB_BOX (widget);
+
+  g_signal_emit (self, signals[SIGNAL_EXTRA_DRAG_DATA_RECEIVED], 0,
+                 self->drop_target_tab->page,
+                 context, selection_data, info, time);
+
+  set_drop_target_tab (self, NULL);
+}
+
+static void
 hdy_tab_box_forall (GtkContainer *container,
                     gboolean      include_internals,
                     GtkCallback   callback,
@@ -3022,6 +3109,8 @@ static void
 hdy_tab_box_dispose (GObject *object)
 {
   HdyTabBox *self = HDY_TAB_BOX (object);
+
+  g_clear_handle_id (&self->drop_switch_timeout_id, g_source_remove);
 
   self->tab_bar = NULL;
   hdy_tab_box_set_view (self, NULL);
@@ -3148,6 +3237,7 @@ hdy_tab_box_class_init (HdyTabBoxClass *klass)
   widget_class->drag_drop = hdy_tab_box_drag_drop;
   widget_class->drag_failed = hdy_tab_box_drag_failed;
   widget_class->drag_data_get = hdy_tab_box_drag_data_get;
+  widget_class->drag_data_received = hdy_tab_box_drag_data_received;
 
   container_class->forall = hdy_tab_box_forall;
 
@@ -3203,6 +3293,20 @@ hdy_tab_box_class_init (HdyTabBoxClass *klass)
                   NULL, NULL, NULL,
                   G_TYPE_NONE,
                   0);
+
+  signals[SIGNAL_EXTRA_DRAG_DATA_RECEIVED] =
+    g_signal_new ("extra-drag-data-received",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE,
+                  5,
+                  HDY_TYPE_TAB_PAGE,
+                  GDK_TYPE_DRAG_CONTEXT,
+                  GTK_TYPE_SELECTION_DATA,
+                  G_TYPE_UINT,
+                  G_TYPE_UINT);
 
   signals[SIGNAL_ACTIVATE_TAB] =
     g_signal_new ("activate-tab",
@@ -3419,3 +3523,24 @@ hdy_tab_box_is_page_focused (HdyTabBox  *self,
 
   return info && gtk_widget_is_focus (GTK_WIDGET (info->tab));
 }
+
+void
+hdy_tab_box_set_extra_drag_dest_targets (HdyTabBox     *self,
+                                         GtkTargetList *extra_drag_dest_targets)
+{
+  GtkTargetList *list;
+  GtkTargetEntry *table;
+  gint n_targets;
+
+  list = gtk_target_list_new (NULL, 0);
+  table = gtk_target_table_new_from_list (extra_drag_dest_targets, &n_targets);
+
+  gtk_target_list_add_table (list, dst_targets, G_N_ELEMENTS (dst_targets));
+  gtk_target_list_add_table (list, table, n_targets);
+
+  gtk_drag_dest_set_target_list (GTK_WIDGET (self), list);
+
+  gtk_target_list_unref (list);
+  gtk_target_table_free (table, n_targets);
+}
+

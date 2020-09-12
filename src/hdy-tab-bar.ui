@@ -27,6 +27,7 @@
                 <property name="pinned">True</property>
                 <property name="hexpand">False</property>
                 <property name="tab-bar">HdyTabBar</property>
+                <signal name="extra-drag-data-received" handler="extra_drag_data_received_cb" swapped="true"/>
                 <style>
                   <class name="pinned"/>
                 </style>
@@ -50,6 +51,7 @@
                         <signal name="notify::needs-attention-left" handler="notify_needs_attention_cb" swapped="true"/>
                         <signal name="notify::needs-attention-right" handler="notify_needs_attention_cb" swapped="true"/>
                         <signal name="stop-kinetic-scrolling" handler="stop_kinetic_scrolling_cb" swapped="true"/>
+                        <signal name="extra-drag-data-received" handler="extra_drag_data_received_cb" swapped="true"/>
                       </object>
                     </child>
                   </object>

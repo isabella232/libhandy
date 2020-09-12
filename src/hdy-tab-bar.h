@@ -53,4 +53,10 @@ void     hdy_tab_bar_set_autohide (HdyTabBar *self,
 HDY_AVAILABLE_IN_ALL
 gboolean hdy_tab_bar_get_tabs_revealed (HdyTabBar *self);
 
+HDY_AVAILABLE_IN_ALL
+GtkTargetList *hdy_tab_bar_get_extra_drag_dest_targets (HdyTabBar     *self);
+HDY_AVAILABLE_IN_ALL
+void           hdy_tab_bar_set_extra_drag_dest_targets (HdyTabBar     *self,
+                                                        GtkTargetList *extra_drag_dest_targets);
+
 G_END_DECLS

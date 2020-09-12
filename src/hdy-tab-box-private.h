@@ -38,4 +38,7 @@ void hdy_tab_box_try_focus_selected_tab (HdyTabBox  *self);
 gboolean hdy_tab_box_is_page_focused (HdyTabBox  *self,
                                       HdyTabPage *page);
 
+void hdy_tab_box_set_extra_drag_dest_targets (HdyTabBox     *self,
+                                              GtkTargetList *extra_drag_dest_targets);
+
 G_END_DECLS

@@ -756,7 +756,6 @@ static void
 hdy_tab_view_dispose (GObject *object)
 {
   HdyTabView *self = HDY_TAB_VIEW (object);
-  GSList *l;
 
   if (self->pages) {
     while (self->n_pages) {

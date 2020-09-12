@@ -62,6 +62,8 @@ struct _HdyTabBar
 
   HdyTabView *view;
   gboolean autohide;
+
+  GtkTargetList *extra_drag_dest_targets;
 };
 
 static void hdy_tab_bar_buildable_init (GtkBuildableIface *iface);
@@ -77,10 +79,18 @@ enum {
   PROP_END_ACTION_WIDGET,
   PROP_AUTOHIDE,
   PROP_TABS_REVEALED,
+  PROP_EXTRA_DRAG_DEST_TARGETS,
   LAST_PROP
 };
 
 static GParamSpec *props[LAST_PROP];
+
+enum {
+  SIGNAL_EXTRA_DRAG_DATA_RECEIVED,
+  SIGNAL_LAST_SIGNAL,
+};
+
+static guint signals[SIGNAL_LAST_SIGNAL];
 
 static void
 set_tabs_revealed (HdyTabBar *self,
@@ -227,6 +237,18 @@ stop_kinetic_scrolling_cb (HdyTabBar *self)
 }
 
 static void
+extra_drag_data_received_cb (HdyTabBar        *self,
+                             HdyTabPage       *page,
+                             GdkDragContext   *context,
+                             GtkSelectionData *selection_data,
+                             guint             info,
+                             guint             time)
+{
+  g_signal_emit (self, signals[SIGNAL_EXTRA_DRAG_DATA_RECEIVED], 0,
+                 page, context, selection_data, info, time);
+}
+
+static void
 view_destroy_cb (HdyTabBar *self)
 {
   hdy_tab_bar_set_view (self, NULL);
@@ -365,6 +387,10 @@ hdy_tab_bar_get_property (GObject    *object,
     g_value_set_boolean (value, hdy_tab_bar_get_tabs_revealed (self));
     break;
 
+  case PROP_EXTRA_DRAG_DEST_TARGETS:
+    g_value_set_boxed (value, hdy_tab_bar_get_extra_drag_dest_targets (self));
+    break;
+
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
   }
@@ -394,6 +420,11 @@ hdy_tab_bar_set_property (GObject      *object,
   case PROP_AUTOHIDE:
     hdy_tab_bar_set_autohide (self, g_value_get_boolean (value));
     break;
+
+  case PROP_EXTRA_DRAG_DEST_TARGETS:
+    hdy_tab_bar_set_extra_drag_dest_targets (self, g_value_get_boxed (value));
+    break;
+
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
   }
@@ -493,7 +524,60 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
                           FALSE,
                           G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * HdyTabBar:extra-drag-dest-targets:
+   *
+   * Extra drag destination targets.
+   *
+   * Allows to drag arbitrary content onto tabs, for example URLs in a web
+   * browser.
+   *
+   * If a tab is hovered for a certain period of time while dragging the
+   * content, it will be automatically selected.
+   *
+   * After content is dropped, the #HdyTabBar::extra-drag-data-received signal
+   * can be used to retrieve and process the drag data.
+   *
+   * Since: 1.2
+   */
+  props[PROP_EXTRA_DRAG_DEST_TARGETS] =
+    g_param_spec_boxed ("extra-drag-dest-targets",
+                        _("Extra drag destination targets"),
+                        _("Extra drag destination targets"),
+                        GTK_TYPE_TARGET_LIST,
+                        G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
+
   g_object_class_install_properties (object_class, LAST_PROP, props);
+
+  /**
+   * HdyTabBar::extra-drag-data-received:
+   * @self: a #HdyTabBar
+   * @page: the #HdyTabPage matching the tab the content was dropped onto
+   * @context: the drag context
+   * @data: the received data
+   * @info: the info that has been registered with the target in the #GtkTargetList
+   * @time: the timestamp at which the data was received
+   *
+   * This signal is emitted when content allowed via
+   * #HdyTabBar:extra-drag-dest-targets is dropped onto a tab.
+   *
+   * See #GtkWidget::drag-data-received.
+   *
+   * Since: 1.2
+   */
+  signals[SIGNAL_EXTRA_DRAG_DATA_RECEIVED] =
+    g_signal_new ("extra-drag-data-received",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE,
+                  5,
+                  HDY_TYPE_TAB_PAGE,
+                  GDK_TYPE_DRAG_CONTEXT,
+                  GTK_TYPE_SELECTION_DATA,
+                  G_TYPE_UINT,
+                  G_TYPE_UINT);
 
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/sm/puri/handy/ui/hdy-tab-bar.ui");
@@ -506,6 +590,7 @@ hdy_tab_bar_class_init (HdyTabBarClass *klass)
   gtk_widget_class_bind_template_child (widget_class, HdyTabBar, end_action_bin);
   gtk_widget_class_bind_template_callback (widget_class, notify_needs_attention_cb);
   gtk_widget_class_bind_template_callback (widget_class, stop_kinetic_scrolling_cb);
+  gtk_widget_class_bind_template_callback (widget_class, extra_drag_data_received_cb);
 
   gtk_widget_class_set_css_name (widget_class, "tabbar");
 }
@@ -849,4 +934,64 @@ hdy_tab_bar_get_tabs_revealed (HdyTabBar *self)
   g_return_val_if_fail (HDY_IS_TAB_BAR (self), FALSE);
 
   return gtk_revealer_get_reveal_child (self->revealer);
+}
+
+/**
+ * hdy_tab_bar_get_extra_drag_dest_targets:
+ * @self: a #HdyTabBar
+ *
+ * Gets extra drag destination targets, see
+ * hdy_tab_bar_set_extra_drag_dest_targets().
+ *
+ * Returns: (transfer none) (nullable): extra drag targets, or %NULL
+ *
+ * Since: 1.2
+ */
+GtkTargetList *
+hdy_tab_bar_get_extra_drag_dest_targets (HdyTabBar *self)
+{
+  g_return_val_if_fail (HDY_IS_TAB_BAR (self), NULL);
+
+  return self->extra_drag_dest_targets;
+}
+
+/**
+ * hdy_tab_bar_set_extra_drag_dest_targets:
+ * @self: a #HdyTabBar
+ * @extra_drag_dest_targets: (transfer none) (nullable): extra drag targets, or %NULL
+ *
+ * Sets extra drag destination targets.
+ *
+ * This allows to drag arbitrary content onto tabs, for example URLs in a web
+ * browser.
+ *
+ * If a tab is hovered for a certain period of time while dragging the content,
+ * it will be automatically selected.
+ *
+ * After content is dropped, the #HdyTabBar::extra-drag-data-received signal can
+ * be used to retrieve and process the drag data.
+ *
+ * Since: 1.2
+ */
+void
+hdy_tab_bar_set_extra_drag_dest_targets (HdyTabBar     *self,
+                                         GtkTargetList *extra_drag_dest_targets)
+{
+  g_return_if_fail (HDY_IS_TAB_BAR (self));
+
+  if (extra_drag_dest_targets == self->extra_drag_dest_targets)
+    return;
+
+  if (self->extra_drag_dest_targets)
+    gtk_target_list_unref (self->extra_drag_dest_targets);
+
+  if (extra_drag_dest_targets)
+    gtk_target_list_ref (extra_drag_dest_targets);
+
+  self->extra_drag_dest_targets = extra_drag_dest_targets;
+
+  hdy_tab_box_set_extra_drag_dest_targets (self->scroll_box, extra_drag_dest_targets);
+  hdy_tab_box_set_extra_drag_dest_targets (self->pinned_box, extra_drag_dest_targets);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_EXTRA_DRAG_DEST_TARGETS]);
 }

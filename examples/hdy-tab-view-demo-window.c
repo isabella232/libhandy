@@ -6,6 +6,7 @@ struct _HdyTabViewDemoWindow
 {
   HdyApplicationWindow parent_instance;
   HdyTabView *view;
+  HdyTabBar *tab_bar;
 
   GActionMap *tab_action_group;
 
@@ -86,10 +87,10 @@ tab_new (GSimpleAction *action,
 
   g_object_bind_property (content, "text",
                           page, "title",
-                          G_BINDING_SYNC_CREATE);
+                          G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL);
   g_object_bind_property_full (content, "text",
                                page, "tooltip",
-                               G_BINDING_SYNC_CREATE,
+                               G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL,
                                text_to_tooltip, NULL,
                                NULL, NULL);
 
@@ -361,20 +362,42 @@ secondary_icon_activated_cb (HdyTabViewDemoWindow *self,
 }
 
 static void
+extra_drag_data_received_cb (HdyTabViewDemoWindow *self,
+                             HdyTabPage           *page,
+                             GdkDragContext       *context,
+                             GtkSelectionData     *selection_data,
+                             guint                 info,
+                             guint                 time)
+{
+  g_autofree gchar *text = NULL;
+
+  if (gtk_selection_data_get_length (selection_data) < 0)
+    return;
+
+  text = (gchar *) gtk_selection_data_get_text (selection_data);
+
+  hdy_tab_page_set_title (page, text);
+}
+
+static void
 hdy_tab_view_demo_window_class_init (HdyTabViewDemoWindowClass *klass)
 {
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/sm/puri/Handy/Demo/ui/hdy-tab-view-demo-window.ui");
   gtk_widget_class_bind_template_child (widget_class, HdyTabViewDemoWindow, view);
+  gtk_widget_class_bind_template_child (widget_class, HdyTabViewDemoWindow, tab_bar);
   gtk_widget_class_bind_template_callback (widget_class, setup_menu_cb);
   gtk_widget_class_bind_template_callback (widget_class, create_window_cb);
   gtk_widget_class_bind_template_callback (widget_class, secondary_icon_activated_cb);
+  gtk_widget_class_bind_template_callback (widget_class, extra_drag_data_received_cb);
 }
 
 static void
 hdy_tab_view_demo_window_init (HdyTabViewDemoWindow *self)
 {
+  GtkTargetList *target_list;
+
   gtk_widget_init_template (GTK_WIDGET (self));
 
   g_action_map_add_action_entries (G_ACTION_MAP (self),
@@ -391,6 +414,15 @@ hdy_tab_view_demo_window_init (HdyTabViewDemoWindow *self)
   gtk_widget_insert_action_group (GTK_WIDGET (self),
                                   "tab",
                                   G_ACTION_GROUP (self->tab_action_group));
+
+  target_list = gtk_target_list_new (NULL, 0);
+  gtk_target_list_add_text_targets (target_list, 0);
+
+  g_object_set (self->tab_bar,
+                "extra-drag-dest-targets", target_list,
+                NULL);
+
+  gtk_target_list_unref (target_list);
 }
 
 HdyTabViewDemoWindow *

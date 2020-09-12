@@ -47,9 +47,10 @@
           </object>
         </child>
         <child>
-          <object class="HdyTabBar">
+          <object class="HdyTabBar" id="tab_bar">
             <property name="visible">True</property>
             <property name="view">view</property>
+            <signal name="extra-drag-data-received" handler="extra_drag_data_received_cb" swapped="true"/>
           </object>
         </child>
         <child>
