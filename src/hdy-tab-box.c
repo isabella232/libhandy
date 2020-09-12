@@ -2851,7 +2851,8 @@ drop_switch_timeout_cb (HdyTabBox *self)
 
 static void
 set_drop_target_tab (HdyTabBox *self,
-                     TabInfo   *info)
+                     TabInfo   *info,
+                     gboolean   highlight)
 {
   if (self->drop_target_tab == info)
     return;
@@ -2860,12 +2861,16 @@ set_drop_target_tab (HdyTabBox *self,
     g_clear_handle_id (&self->drop_switch_timeout_id, g_source_remove);
 
     gtk_drag_unhighlight (GTK_WIDGET (self->drop_target_tab->tab));
+    hdy_tab_set_hovering (self->drop_target_tab->tab, FALSE);
   }
 
   self->drop_target_tab = info;
 
   if (self->drop_target_tab) {
-    gtk_drag_highlight (GTK_WIDGET (info->tab));
+    hdy_tab_set_hovering (info->tab, TRUE);
+
+    if (highlight)
+      gtk_drag_highlight (GTK_WIDGET (info->tab));
 
     self->drop_switch_timeout_id =
       g_timeout_add (DROP_SWITCH_TIMEOUT,
@@ -2890,7 +2895,9 @@ hdy_tab_box_drag_motion (GtkWidget      *widget,
   tab_target = gdk_atom_intern_static_string ("HDY_TAB");
 
   if (target != tab_target) {
-    set_drop_target_tab (self, find_tab_info_at (self, x));
+    GdkAtom none_target = gdk_atom_intern_static_string ("NONE");
+
+    set_drop_target_tab (self, find_tab_info_at (self, x), target != none_target);
 
     return GDK_EVENT_STOP;
   }
@@ -2929,7 +2936,7 @@ hdy_tab_box_drag_motion (GtkWidget      *widget,
 
     gdk_drag_status (context, GDK_ACTION_MOVE, time);
 
-    return GDK_EVENT_PROPAGATE;
+    return GDK_EVENT_STOP;
   }
 
   display_width = hdy_tab_get_display_width (self->reorder_placeholder->tab);
@@ -2939,14 +2946,14 @@ hdy_tab_box_drag_motion (GtkWidget      *widget,
 
   gdk_drag_status (context, GDK_ACTION_MOVE, time);
 
-  return GDK_EVENT_PROPAGATE;
+  return GDK_EVENT_STOP;
 }
 
 static gboolean
 reset_drop_target_tab_cb (HdyTabBox *self)
 {
   self->reset_drop_target_tab_id = 0;
-  set_drop_target_tab (self, NULL);
+  set_drop_target_tab (self, NULL, FALSE);
 
   return G_SOURCE_REMOVE;
 }
@@ -2964,11 +2971,15 @@ hdy_tab_box_drag_leave (GtkWidget      *widget,
   tab_target = gdk_atom_intern_static_string ("HDY_TAB");
 
   if (target != tab_target) {
-    self->reset_drop_target_tab_id =
-      g_idle_add ((GSourceFunc) reset_drop_target_tab_cb, self);
+    if (!self->reset_drop_target_tab_id)
+      self->reset_drop_target_tab_id =
+        g_idle_add ((GSourceFunc) reset_drop_target_tab_cb, self);
 
     return;
   }
+
+  if (!self->indirect_reordering)
+    return;
 
   if (self->pinned)
     return;
@@ -3078,12 +3089,15 @@ hdy_tab_box_drag_data_received (GtkWidget        *widget,
                                 guint             time)
 {
   HdyTabBox *self = HDY_TAB_BOX (widget);
+  TabInfo *tab_info = find_tab_info_at (self, x);
+
+  g_assert (tab_info);
 
   g_signal_emit (self, signals[SIGNAL_EXTRA_DRAG_DATA_RECEIVED], 0,
-                 self->drop_target_tab->page,
+                 tab_info->page,
                  context, selection_data, info, time);
 
-  set_drop_target_tab (self, NULL);
+  set_drop_target_tab (self, NULL, FALSE);
 }
 
 static void
@@ -3399,10 +3413,14 @@ hdy_tab_box_init (HdyTabBox *self)
                            G_CONNECT_SWAPPED);
 
   gtk_drag_dest_set (GTK_WIDGET (self),
-                     GTK_DEST_DEFAULT_MOTION,
-                     dst_targets,
-                     G_N_ELEMENTS (dst_targets),
-                     GDK_ACTION_MOVE);
+                     0,
+                     dst_targets, G_N_ELEMENTS (dst_targets),
+                     GDK_ACTION_MOVE |
+                     GDK_ACTION_COPY |
+                     GDK_ACTION_LINK |
+                     GDK_ACTION_ASK |
+                     GDK_ACTION_PRIVATE);
+  gtk_drag_dest_set_track_motion (GTK_WIDGET (self), TRUE);
 
   self->source_targets = gtk_target_list_new (src_targets,
                                               G_N_ELEMENTS (src_targets));

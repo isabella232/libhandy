@@ -418,9 +418,7 @@ hdy_tab_view_demo_window_init (HdyTabViewDemoWindow *self)
   target_list = gtk_target_list_new (NULL, 0);
   gtk_target_list_add_text_targets (target_list, 0);
 
-  g_object_set (self->tab_bar,
-                "extra-drag-dest-targets", target_list,
-                NULL);
+  hdy_tab_bar_set_extra_drag_dest_targets (self->tab_bar, target_list);
 
   gtk_target_list_unref (target_list);
 }
