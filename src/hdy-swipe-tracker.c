@@ -74,8 +74,6 @@ struct _HdySwipeTracker
 
   GArray *event_history;
 
-  gint start_x;
-  gint start_y;
   gboolean use_capture_phase;
 
   gdouble initial_progress;
@@ -168,8 +166,6 @@ reset (HdySwipeTracker *self)
 
   g_array_remove_range (self->event_history, 0, self->event_history->len);
 
-  self->start_x = 0;
-  self->start_y = 0;
   self->use_capture_phase = FALSE;
 
   self->cancelled = FALSE;
@@ -194,24 +190,10 @@ get_range (HdySwipeTracker *self,
 
 static void
 gesture_prepare (HdySwipeTracker        *self,
-                 HdyNavigationDirection  direction,
-                 gboolean                is_drag)
+                 HdyNavigationDirection  direction)
 {
-  GdkRectangle rect;
-
   if (self->state != HDY_SWIPE_TRACKER_STATE_NONE)
     return;
-
-  hdy_swipeable_get_swipe_area (self->swipeable, direction, is_drag, &rect);
-
-  if (self->start_x < rect.x ||
-      self->start_x >= rect.x + rect.width ||
-      self->start_y < rect.y ||
-      self->start_y >= rect.y + rect.height) {
-    self->state = HDY_SWIPE_TRACKER_STATE_REJECTED;
-
-    return;
-  }
 
   hdy_swipe_tracker_emit_begin_swipe (self, direction, TRUE);
 
@@ -498,6 +480,21 @@ gesture_cancel (HdySwipeTracker *self,
   gesture_end (self, distance, is_touchpad);
 }
 
+static inline gboolean
+is_in_swipe_area (HdySwipeTracker        *self,
+                  gdouble                 x,
+                  gdouble                 y,
+                  HdyNavigationDirection  direction,
+                  gboolean                is_drag)
+{
+  GdkRectangle rect;
+
+  hdy_swipeable_get_swipe_area (self->swipeable, direction, is_drag, &rect);
+
+  return x >= rect.x && x < rect.x + rect.width &&
+         y >= rect.y && y < rect.y + rect.height;
+}
+
 static void
 drag_begin_cb (HdySwipeTracker *self,
                gdouble          start_x,
@@ -506,9 +503,6 @@ drag_begin_cb (HdySwipeTracker *self,
 {
   if (self->state != HDY_SWIPE_TRACKER_STATE_NONE)
     gtk_gesture_set_state (self->touch_gesture, GTK_EVENT_SEQUENCE_DENIED);
-
-  self->start_x = start_x;
-  self->start_y = start_y;
 }
 
 static void
@@ -542,7 +536,7 @@ drag_update_cb (HdySwipeTracker *self,
 
   if (self->state == HDY_SWIPE_TRACKER_STATE_NONE) {
     if (is_vertical == is_offset_vertical)
-      gesture_prepare (self, offset > 0 ? HDY_NAVIGATION_DIRECTION_FORWARD : HDY_NAVIGATION_DIRECTION_BACK, TRUE);
+      gesture_prepare (self, offset > 0 ? HDY_NAVIGATION_DIRECTION_FORWARD : HDY_NAVIGATION_DIRECTION_BACK);
     else
       gtk_gesture_set_state (self->touch_gesture, GTK_EVENT_SEQUENCE_DENIED);
     return;
@@ -560,6 +554,16 @@ drag_update_cb (HdySwipeTracker *self,
                       (offset > 0 && self->progress >= last_point);
 
     if (drag_distance >= DRAG_THRESHOLD_DISTANCE) {
+      gdouble start_x, start_y;
+      HdyNavigationDirection direction;
+
+      gtk_gesture_drag_get_start_point (gesture, &start_x, &start_y);
+      direction = offset > 0 ? HDY_NAVIGATION_DIRECTION_FORWARD : HDY_NAVIGATION_DIRECTION_BACK;
+
+      if (!is_in_swipe_area (self, start_x, start_y, direction, TRUE) &&
+          !is_in_swipe_area (self, start_x + offset_x, start_y + offset_y, direction, TRUE))
+        return;
+
       if ((is_vertical == is_offset_vertical) && !is_overshooting) {
         gesture_begin (self);
         self->prev_offset = offset;
@@ -665,13 +669,18 @@ handle_scroll_event (HdySwipeTracker *self,
     if (is_vertical == is_delta_vertical) {
       if (!capture) {
         gdouble event_x, event_y;
+        HdyNavigationDirection direction;
 
         get_widget_coordinates (self, event, &event_x, &event_y);
 
-        self->start_x = (gint) round (event_x);
-        self->start_y = (gint) round (event_y);
+        direction = delta > 0 ? HDY_NAVIGATION_DIRECTION_FORWARD : HDY_NAVIGATION_DIRECTION_BACK;
 
-        gesture_prepare (self, delta > 0 ? HDY_NAVIGATION_DIRECTION_FORWARD : HDY_NAVIGATION_DIRECTION_BACK, FALSE);
+        if (!is_in_swipe_area (self, event_x, event_y, direction, FALSE)) {
+          self->state = HDY_SWIPE_TRACKER_STATE_REJECTED;
+          return GDK_EVENT_PROPAGATE;
+        }
+
+        gesture_prepare (self, delta > 0 ? HDY_NAVIGATION_DIRECTION_FORWARD : HDY_NAVIGATION_DIRECTION_BACK);
       }
     } else {
       self->is_scrolling = TRUE;
